@@ -1,4 +1,4 @@
-let bushPositions = [
+window.bushPositions = [
     [120, 340],
     [480, 910],
     [860, 270],
