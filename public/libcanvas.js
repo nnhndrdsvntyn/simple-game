@@ -1,0 +1,189 @@
+class LibCanvas {
+    constructor() {
+        this.images = {};
+        [this.width, this.height] = [1440, 760];
+        this.createDOM();
+    }
+
+    createDOM() {
+        this.container = document.createElement('div');
+        this.canvas = document.createElement('canvas');
+        this.ctx = this.canvas.getContext('2d');
+
+        this.container.style.position = 'fixed';
+        this.container.style.top = '0';
+        this.container.style.left = '0';
+        this.container.style.width = '100%';
+        this.container.style.height = '100%';
+        this.container.style.margin = '0';
+        this.container.style.padding = '0';
+
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+        this.canvas.style.width = '100%';
+        this.canvas.style.height = '100%';
+        this.canvas.style.backgroundColor = 'gray';
+
+        this.container.appendChild(this.canvas);
+        document.body.appendChild(this.container);
+
+        document.body.style.margin = '0';
+        document.body.style.padding = '0';
+    }
+
+    clearCanvas() {
+        this.ctx.clearRect(0, 0, this.width, this.height);
+    }
+
+    drawRect({
+        pos = [0, 0],
+        size = [100, 100],
+        color = 'black',
+        transparency = 1
+    } = {}) {
+        if (!Array.isArray(pos) || pos.length !== 2) {
+            throw new Error('pos must be a 2 element array for drawRect');
+        }
+        if (!Array.isArray(size) || size.length !== 2) {
+            throw new Error('size must be a 2 element array for drawRect');
+        }
+        if (typeof color !== 'string') {
+            throw new Error('color must be a string for drawRect');
+        }
+        if (typeof transparency !== 'number' || transparency < 0 || transparency > 1) {
+            throw new Error('transparency must be a number between 0 and 1 for drawRect');
+        }
+
+        const [x, y] = pos;
+        const [width, height] = size;
+        this.ctx.fillStyle = color;
+        this.ctx.globalAlpha = transparency;
+        this.ctx.fillRect(x, y, width, height);
+        this.ctx.globalAlpha = 1;
+    }
+
+    drawCircle({
+        pos = [0, 0],
+        radius = 50,
+        color = 'black',
+        transparency = 1
+    } = {}) {
+        if (!Array.isArray(pos) || pos.length !== 2) {
+            throw new Error('pos must be a 2 element array for drawCircle');
+        }
+        if (typeof radius !== 'number' || radius <= 0) {
+            throw new Error('radius must be a positive number for drawCircle');
+        }
+        if (typeof color !== 'string') {
+            throw new Error('color must be a string for drawCircle');
+        }
+        if (typeof transparency !== 'number' || transparency < 0 || transparency > 1) {
+            throw new Error('transparency must be a number between 0 and 1 for drawCircle');
+        }
+
+        const [x, y] = pos;
+        this.ctx.fillStyle = color;
+        this.ctx.globalAlpha = transparency;
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.globalAlpha = 1;
+    }
+
+    drawText({
+        text = '',
+        pos = [0, 0],
+        font = '16px Arial',
+        color = 'black'
+    } = {}) {
+        if (typeof text !== 'string') {
+            throw new Error('text must be a string for drawText');
+        }
+        if (!Array.isArray(pos) || pos.length !== 2) {
+            throw new Error('pos must be a 2 element array for drawText');
+        }
+        if (typeof font !== 'string') {
+            throw new Error('font must be a string for drawText');
+        }
+        if (typeof color !== 'string') {
+            throw new Error('color must be a string for drawText');
+        }
+
+        const [x, y] = pos;
+        this.ctx.fillStyle = color;
+        this.ctx.font = font;
+        this.ctx.fillText(text, x, y);
+    }
+    measureText({
+        text = '',
+        font = '16px Arial'
+    } = {}) {
+        if (typeof text !== 'string') {
+            throw new Error('text must be a string for measureText');
+        }
+        if (typeof font !== 'string') {
+            throw new Error('font must be a string for measureText');
+        }
+
+        this.ctx.font = font;
+        const metrics = this.ctx.measureText(text);
+
+        return {
+            width: metrics.width,
+            height: (metrics.actualBoundingBoxAscent ?? 0) +
+                (metrics.actualBoundingBoxDescent ?? 0)
+        };
+    }
+
+    loadImage({
+        name,
+        src
+    } = {}) {
+        if (name === undefined) {
+            throw new Error('name must be defined for loadImage');
+        }
+        if (src === undefined) {
+            throw new Error('src must be defined for loadImage');
+        }
+
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                this.images[name] = img;
+                resolve(img);
+            };
+            img.onerror = reject;
+            img.src = src;
+        });
+    }
+
+    drawImage({
+        name,
+        pos = [0, 0],
+        size,
+        transparency = 1
+    } = {}) {
+        if (name === undefined) {
+            throw new Error('name must be defined for drawImage');
+        }
+        if (!Array.isArray(pos) || pos.length !== 2) {
+            throw new Error('pos must be a 2 element array for drawImage');
+        }
+        if (!Array.isArray(size) || size.length !== 2) {
+            throw new Error('size must be a 2 element array for drawImage');
+        }
+        if (!this.images[name]) {
+            throw new Error(`image ${name} needs to be loaded before it can be drawn.`);
+        }
+
+        const [x, y] = pos;
+        const [width, height] = size;
+        this.ctx.globalAlpha = transparency;
+        this.ctx.drawImage(this.images[name], x, y, width, height);
+        this.ctx.globalAlpha = 1;
+    }
+
+    get center() {
+        return [this.width / 2, this.height / 2];
+    }
+}

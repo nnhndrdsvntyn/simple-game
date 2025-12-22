@@ -1,0 +1,52 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Open World</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="libcanvas.js"></script>
+  <script type="module" src="client.js"></script>
+  <script>
+    // Chat message input on Enter
+    const input = document.createElement('input');
+    Object.assign(input.style, {
+      position: 'absolute',
+      top: '60%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      padding: '10px',
+      fontSize: '16px',
+      border: '1px solid #ccc',
+      borderRadius: '4px',
+      display: 'none',
+      zIndex: '1000'
+    });
+    input.type = 'text';
+    input.placeholder = 'Type your message...';
+    input.maxLength = 50;
+    document.body.appendChild(input);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+      if (input.style.display === 'none') {
+        input.style.display = 'block';
+        input.focus();
+      } else {
+        const message = input.value.trim();
+        if (message) {
+        window.socket.emit('chat', { message });
+        }
+        input.value = '';
+        input.style.display = 'none';
+      }
+      }
+    });
+  </script>
+</body>
+</html>
