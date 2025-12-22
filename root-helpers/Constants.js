@@ -4,8 +4,8 @@ const Constants = {
     },
     PLAYERS: {
         SPEED: 200, // in units per second
-        CHAT_DURATION: 10, // in seconds
-        CHAT_MAX_LENGTH: 50
+        CHAT_DURATION: 5, // in seconds
+        CHAT_MAX_LENGTH: 100
     },
     DECORATIONS: {
         'rock': {
