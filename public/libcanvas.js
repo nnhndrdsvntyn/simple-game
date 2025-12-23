@@ -173,7 +173,10 @@ class LibCanvas {
             throw new Error('size must be a 2 element array for drawImage');
         }
         if (!this.images[name]) {
-            throw new Error(`image ${name} needs to be loaded before it can be drawn.`);
+            // throw new Error(`image ${name} needs to be loaded before it can be drawn.`);
+
+            // don't throw an error, just silently return
+            return;
         }
 
         const [x, y] = pos;

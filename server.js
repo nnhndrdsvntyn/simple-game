@@ -18,6 +18,11 @@ const Decorations = {};
 // -= IMPORT CONSTANTS -= \\
 import Constants from "./root-helpers/Constants.js";
 
+// -= IMPORT PHYSICS HELPERS -= \\
+import {
+    resolveCollisions
+} from './root-helpers/Physics.js';
+
 // -= IMPORT PLAYER CLASS -= \\
 import Player from "./root-helpers/Player.js";
 
@@ -47,11 +52,11 @@ io.on('connection', (socket) => {
         id: socket.id,
         x: 5000,
         y: 5000
-    }) 
+    })
 
     // send the new socket/connection all the entity data
     // send after a small wait. (gives client time to set itself up)
-    
+
     setTimeout(() => {
         // init entry snapshots
         let players = [];
@@ -71,7 +76,7 @@ io.on('connection', (socket) => {
         Object.values(Decorations).forEach(decoration => {
             decorations.push(decoration);
         });
-        
+
         socket.emit("init", {
             players: players,
             decorations: decorations
@@ -87,25 +92,29 @@ io.on('connection', (socket) => {
     socket.on("chat", (data) => {
         // safety checks
         if (typeof data.message !== 'string') {
-            socket.emit("kicked", { reason: 'Do not send malformed chats.' });
+            socket.emit("kicked", {
+                reason: 'Do not send malformed chats.'
+            });
             socket.disconnect();
             console.log('⚠️ Socket kicked for sending a malformed chat:', socket.id);
             return;
         }
         if (data.message.length > Constants.PLAYERS.CHAT_MAX_LENGTH) {
-            socket.emit("kicked", { reason: 'Chat message too long.' });
+            socket.emit("kicked", {
+                reason: 'Chat message too long.'
+            });
             socket.disconnect();
             console.log('⚠️ Socket kicked for sending a long chat:', socket.id);
             return;
         }
-        
+
         Players[socket.id].setMessage(data.message);
     });
 
     // listen for players that left, and remove them from the data/system
     socket.on("disconnect", () => {
         console.log("🔴 Socket disconnected:", socket.id);
-        
+
         // tell clients to delete that player
         io.emit('delete', {
             type: 'player',
@@ -121,33 +130,32 @@ io.on('connection', (socket) => {
 function update() {
     // update entry snapshots
     let players = [];
-    
+
     // edit players and put them in the updates
     Object.values(Players).forEach(player => {
-        if (!player) return;
+        const oldX = player.x;
+        const oldY = player.y;
+
         if (player.keys['w']) player.move('w');
         if (player.keys['a']) player.move('a');
         if (player.keys['s']) player.move('s');
         if (player.keys['d']) player.move('d');
 
-        // clamp players inside of map bounds
+        resolveCollisions(player, Object.values(Decorations));
+
         player.x = Math.max(0, Math.min(Constants.MAP.WIDTH, player.x));
         player.y = Math.max(0, Math.min(Constants.MAP.HEIGHT, player.y));
 
-        if (!player.changed) return;
-        player.changed = false;
+        if (player.x === oldX && player.y === oldY) return;
 
-        // make a copy of the player to send to the clients
-        // speed, and keys attributes won't be shown.
-
-        const clientPlayer = {
+        players.push({
             id: player.id,
             x: player.x,
             y: player.y,
             chatMessage: player.chatMessage
-        }
-        players.push(clientPlayer);
+        });
     });
+
 
     // send out update packets
     io.emit('update', {
