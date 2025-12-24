@@ -104,3 +104,80 @@ chatButton.addEventListener('click', () => {
     }
 });
 document.body.appendChild(chatButton);
+
+
+// arrow buttons top, bottom, right, left to move player on mobile
+// Create container
+const arrowButtonsContainer = document.createElement('div');
+document.body.appendChild(arrowButtonsContainer);
+
+const sendKey = (key, state) => {
+    socket.emit('keyInput', { key, state });
+};
+
+const buttonSize = 60;
+const gap = 5;
+const containerSize = buttonSize * 3 + gap * 2;
+
+// Set ALL container styles at once with cssText
+arrowButtonsContainer.style.cssText = `
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    width: ${containerSize}px;
+    height: ${containerSize}px;
+    display: grid;
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    gap: ${gap}px;
+    z-index: 1000;
+`;
+
+const createButton = (text, key, col, row) => {
+    const btn = document.createElement('button');
+    btn.textContent = text;
+    btn.style.cssText = `
+        grid-column: ${col};
+        grid-row: ${row};
+        width: ${buttonSize}px;
+        height: ${buttonSize}px;
+        border: none;
+        border-radius: 8px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+    
+    btn.onmousedown = () => {
+        btn.style.transform = 'scale(0.95)';
+        sendKey(key, true);
+    };
+    
+    btn.onmouseup = () => {
+        btn.style.transform = '';
+        sendKey(key, false);
+    };
+    
+    btn.onmouseleave = () => {
+        btn.style.transform = '';
+        btn.style.background = 'rgba(0,0,0,0.7)';
+        sendKey(key, false);
+    };
+    
+    btn.onmouseenter = () => {
+        btn.style.background = 'rgba(50,50,50,0.9)';
+    };
+    
+    return btn;
+};
+
+// Create and add buttons
+arrowButtonsContainer.append(
+    createButton('↑', 'w', 2, 1),
+    createButton('←', 'a', 1, 2),
+    createButton('→', 'd', 3, 2),
+    createButton('↓', 's', 2, 3)
+);
