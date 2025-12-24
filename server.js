@@ -47,7 +47,8 @@ io.on('connection', (socket) => {
 function update() {
     // client update
     const clientUpdate = {
-        PLAYERS: {}
+        PLAYERS: {},
+        STRUCTURES: {},
     };
     
     // update and add players to clientUpdate if they actually changed
