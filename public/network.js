@@ -42,6 +42,7 @@ export class Network {
         console.log('update:', data);
         for (const id in data.PLAYERS) {
             ENTITIES.PLAYERS[id].newPos = data.PLAYERS[id].pos;
+            ENTITIES.PLAYERS[id].chatMessage = data.PLAYERS[id].chatMessage;
         }
     }
 }

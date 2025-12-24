@@ -6,11 +6,12 @@ export function buildInitPacket() {
         STRUCTURES: {}
     };
 
-    // client-ify players (only send positions)
+    // client-ify players (only send position, id, and chat message)
     Object.values(game.ENTITIES.PLAYERS).forEach(player => {
         initPacket['PLAYERS'][player.id] = {
             id: player.id,
-            pos: player.pos
+            pos: player.pos,
+            chatMessage: player.chatMessage
         };
     });
 

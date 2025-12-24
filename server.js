@@ -41,6 +41,11 @@ io.on('connection', (socket) => {
     socket.on("keyInput", (d) => {
         game.ENTITIES.PLAYERS[socket.id].keys[d.key] = d.state;
     });
+
+    socket.on("chat", (d) => {
+        console.log(`${socket.id} said ${d.message}`);
+        game.ENTITIES.PLAYERS[socket.id].setChat(d.message);
+    })
 });
 
 // update loop
@@ -56,7 +61,8 @@ function update() {
         player.move(); // NOTE: only moves if players have any velocity.
         if (player.changed) clientUpdate.PLAYERS[player.id] = {
             id: player.id,
-            pos: player.pos
+            pos: player.pos,
+            chatMessage: player.chatMessage
         };
         player.changed = false;
     }

@@ -4,7 +4,18 @@ window.ENTITIES = ENTITIES;
 import { Network } from './network.js';
 
 export const socket = io();
-window.socket = socket;
+socket.on("connect", () => {
+    socket.emit('keyInput', {
+        key: 'a',
+        state: true,
+    });
+    setTimeout(() => {
+        socket.emit('keyInput', {
+            key: 'a',
+            state: false,
+        });
+    }, 50);
+})
 const network = new Network(socket);
 
 export const LC = new LibCanvas();

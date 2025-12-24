@@ -9,6 +9,7 @@ export class Player {
         this.radius = 30;
         this.pos = pos;
         this.newPos = { ...this.pos };
+        this.chatMessage = "";
         this.color = (this.id === socket.id) ? 'blue' : 'red'; // blue if local player, red if its another player
     }
     draw = function() {
@@ -29,7 +30,7 @@ export class Player {
         ];
 
 
-        // simulate black outline on player
+        // simulate black outline on player by drawing a bigger blacker circle first
         LC.drawCircle({
             pos: screenPos,
             radius: this.radius * 1.1,
@@ -41,5 +42,20 @@ export class Player {
             radius: this.radius,
             color: this.color
         });
+
+        // draw chat message bubble if its not empty
+        if (this.chatMessage != '') {
+            const textSize = LC.measureText({
+                text: this.chatMessage,
+                font: '16px Arial'
+            });
+            const x = screenPos[0] - textSize.width / 2;
+            const y = screenPos[1] - this.radius - textSize.height - 10;
+            LC.drawText({
+                text: this.chatMessage,
+                pos: [x, y],
+                color: 'white'
+            });
+        }
     };
 };
