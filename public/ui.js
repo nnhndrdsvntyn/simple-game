@@ -119,7 +119,6 @@ const buttonSize = 60;
 const gap = 5;
 const containerSize = buttonSize * 3 + gap * 2;
 
-// Set ALL container styles at once with cssText
 arrowButtonsContainer.style.cssText = `
     position: fixed;
     left: 20px;
@@ -130,6 +129,7 @@ arrowButtonsContainer.style.cssText = `
     grid-template: repeat(3, 1fr) / repeat(3, 1fr);
     gap: ${gap}px;
     z-index: 1000;
+    touch-action: none;
 `;
 
 const createButton = (text, key, col, row) => {
@@ -149,15 +149,35 @@ const createButton = (text, key, col, row) => {
         display: flex;
         align-items: center;
         justify-content: center;
+        touch-action: manipulation;
+        user-select: none;
     `;
     
+    // Touch events
+    btn.ontouchstart = (e) => {
+        e.preventDefault();
+        btn.style.transform = 'scale(0.95)';
+        btn.style.background = 'rgba(50,50,50,0.9)';
+        sendKey(key, true);
+    };
+    
+    btn.ontouchend = (e) => {
+        e.preventDefault();
+        btn.style.transform = '';
+        btn.style.background = 'rgba(0,0,0,0.7)';
+        sendKey(key, false);
+    };
+    
+    // Mouse events
     btn.onmousedown = () => {
         btn.style.transform = 'scale(0.95)';
+        btn.style.background = 'rgba(50,50,50,0.9)';
         sendKey(key, true);
     };
     
     btn.onmouseup = () => {
         btn.style.transform = '';
+        btn.style.background = 'rgba(0,0,0,0.7)';
         sendKey(key, false);
     };
     
@@ -167,14 +187,9 @@ const createButton = (text, key, col, row) => {
         sendKey(key, false);
     };
     
-    btn.onmouseenter = () => {
-        btn.style.background = 'rgba(50,50,50,0.9)';
-    };
-    
     return btn;
 };
 
-// Create and add buttons
 arrowButtonsContainer.append(
     createButton('↑', 'w', 2, 1),
     createButton('←', 'a', 1, 2),
