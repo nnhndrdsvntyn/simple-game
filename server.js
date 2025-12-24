@@ -1,167 +1,70 @@
-import express from "express";
-import {
-    createServer
-} from "http";
-import {
-    Server
-} from "socket.io";
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import { Game } from './server/game.js';
+import { Player } from './server/player.js';
+import { buildInitPacket } from './server/network.js';
 
 const app = express();
-app.use(express.static("public"));
-const httpServer = createServer(app);
-const io = new Server(httpServer);
+const server = http.createServer(app);
+const io = new Server(server);
 
-// -= DATA STORING -= \\
-const Players = {};
-const Decorations = {};
+app.use(express.static('public'));
 
-// -= IMPORT CONSTANTS -= \\
-import Constants from "./root-helpers/Constants.js";
-
-// -= IMPORT PHYSICS HELPERS -= \\
-import {
-    resolveCollisions
-} from './root-helpers/Physics.js';
-
-// -= IMPORT PLAYER CLASS -= \\
-import Player from "./root-helpers/Player.js";
-
-// -= IMPORT DECORATION CLASS -= \\
-import Decoration from "./root-helpers/Decoration.js";
-// -+ CREATE DECORATIONS -+ \\
-// rocks
-for (let i = 1; i <= 100; i++) {
-    const id = `rock-${i}`;
-    const size = Constants.DECORATIONS['rock'].size;
-    const x = Math.floor(Math.random() * (Constants.MAP.WIDTH - size - 200)) + 100;
-    const y = Math.floor(Math.random() * (Constants.MAP.HEIGHT - size - 200)) + 100;
-    const rock = new Decoration(id, x, y, 'rock');
-    Decorations[id] = rock;
-}
+const game = new Game(io);
+export { game };
 
 io.on('connection', (socket) => {
-    console.log("🟢 Socket connected:", socket.id);
+    console.log("socket connected", socket.id);
 
     // create the new player
-    let player = new Player(socket.id, 5000, 5000);
-    Players[socket.id] = player;
+    game.newEntity('PLAYERS', new Player(socket.id));
 
-    // send all clients (excluding this one) the add event
-    socket.broadcast.emit("add", {
-        type: 'player',
-        id: socket.id,
-        x: 5000,
-        y: 5000
-    })
-
-    // send the new socket/connection all the entity data
-    // send after a small wait. (gives client time to set itself up)
-
-    setTimeout(() => {
-        // init entry snapshots
-        let players = [];
-        let decorations = []
-
-        Object.values(Players).forEach(player => {
-            // make a copy of the player to send to the clients
-            // speed, and keys attributes won't be shown.
-
-            const clientPlayer = {
-                id: player.id,
-                x: player.x,
-                y: player.y
-            }
-            players.push(clientPlayer);
-        });
-        Object.values(Decorations).forEach(decoration => {
-            decorations.push(decoration);
-        });
-
-        socket.emit("init", {
-            players: players,
-            decorations: decorations
-        });
-    }, 500);
-
-    // listen for inputs and change player key states
-    socket.on("keystate", (data) => {
-        data.state ? Players[socket.id].keys[data.key] = true : Players[socket.id].keys[data.key] = false;
+    // send other clients an add packet
+    socket.broadcast.emit('add', {
+        type: 'PLAYERS',
+        id: socket.id
     });
 
-    // listen for chat messages and store serverside
-    socket.on("chat", (data) => {
-        // safety checks
-        if (typeof data.message !== 'string') {
-            socket.emit("kicked", {
-                reason: 'Do not send malformed chats.'
-            });
-            socket.disconnect();
-            console.log('⚠️ Socket kicked for sending a malformed chat:', socket.id);
-            return;
-        }
-        if (data.message.length > Constants.PLAYERS.CHAT_MAX_LENGTH) {
-            socket.emit("kicked", {
-                reason: 'Chat message too long.'
-            });
-            socket.disconnect();
-            console.log('⚠️ Socket kicked for sending a long chat:', socket.id);
-            return;
-        }
+    socket.emit('init', buildInitPacket()); // send new client game data
 
-        Players[socket.id].setMessage(data.message);
-    });
-
-    // listen for players that left, and remove them from the data/system
     socket.on("disconnect", () => {
-        console.log("🔴 Socket disconnected:", socket.id);
+        game.deleteEntity('PLAYERS', socket.id);
 
-        // tell clients to delete that player
-        io.emit('delete', {
-            type: 'player',
+        // send other clients a delete packet
+        socket.broadcast.emit('delete', {
+            type: 'PLAYERS',
             id: socket.id
-        });
+        })
+    });
 
-        // delete that player on the serverside
-        delete Players[socket.id];
-    })
+    socket.on("keyInput", (d) => {
+        game.ENTITIES.PLAYERS[socket.id].keys[d.key] = d.state;
+    });
 });
 
-// -= MAIN LOOP -= \\
+// update loop
 function update() {
-    // update entry snapshots
-    let players = [];
-
-    // edit players and put them in the updates
-    Object.values(Players).forEach(player => {
-        const oldX = player.x;
-        const oldY = player.y;
-
-        if (player.keys['w']) player.move('w');
-        if (player.keys['a']) player.move('a');
-        if (player.keys['s']) player.move('s');
-        if (player.keys['d']) player.move('d');
-
-        resolveCollisions(player, Object.values(Decorations));
-
-        player.x = Math.max(0, Math.min(Constants.MAP.WIDTH, player.x));
-        player.y = Math.max(0, Math.min(Constants.MAP.HEIGHT, player.y));
-
-        if (player.x === oldX && player.y === oldY) return;
-
-        players.push({
+    // client update
+    const clientUpdate = {
+        PLAYERS: {}
+    };
+    
+    // update and add players to clientUpdate if they actually changed
+    for (const player of Object.values(game.ENTITIES.PLAYERS)) {
+        player.move(); // NOTE: only moves if players have any velocity.
+        if (player.changed) clientUpdate.PLAYERS[player.id] = {
             id: player.id,
-            x: player.x,
-            y: player.y,
-            chatMessage: player.chatMessage
-        });
-    });
-
-
-    // send out update packets
-    io.emit('update', {
-        players
-    });
+            pos: player.pos
+        };
+        player.changed = false;
+    }
+    
+    // send update packet to clients
+    if (Object.keys(clientUpdate.PLAYERS).length > 0) io.emit('update', clientUpdate);
 }
-setInterval(update, 1000 / Constants.SERVER.TICK_RATE); // send updates at 20 TPS
+setInterval(update, 1000 / 20);
 
-httpServer.listen(3000);
+server.listen(3000, () => {
+    console.log('Server running on http://localhost:3000');
+});
