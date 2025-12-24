@@ -1,5 +1,6 @@
 import { ENTITIES } from './game.js';
 import { Player } from './player.js';
+import { Structure } from './structure.js'
 
 export class Network {
     constructor(socket) {
@@ -18,6 +19,12 @@ export class Network {
         for (const id in data.PLAYERS) {
             const player = data.PLAYERS[id];
             ENTITIES.PLAYERS[id] = new Player(player.id, player.pos);
+        }
+
+        // populate structure list
+        for (const id in data.STRUCTURES) {
+            const structure = data.STRUCTURES[id];
+            ENTITIES.STRUCTURES[id] = new Structure(id, structure.pos, structure.type);
         }
     }
 

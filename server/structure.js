@@ -1,8 +1,4 @@
-export const structureMap = new Map();
-structureMap.set('rock1', {
-    type: 'rock1',
-    radius: 150,
-});
+import { structureMap } from '../public/shared/structuremap.js';
 export class Structure {
     constructor(id, pos, type) {
         this.id = id;

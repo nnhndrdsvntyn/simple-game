@@ -1,4 +1,5 @@
-import { Structure, structureMap } from './structure.js';
+import { Structure } from './structure.js';
+import { structureMap } from '../public/shared/structuremap.js';
 
 export class Game {
     constructor(server) {
