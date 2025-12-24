@@ -1,6 +1,41 @@
 import {
     socket
 } from './client.js';
+
+import { ENTITIES } from './game.js';
+
+import { LC } from './client.js';
+// render game info top left of the screen
+export function renderGameInfo() {
+    // Simple info panel with background
+    LC.drawRect({
+        pos: [20, 20],
+        size: [180, 60],
+        color: 'rgba(0, 0, 0, 0.7)',
+        cornerRadius: 5
+    });
+
+    const playerCount = Object.keys(ENTITIES.PLAYERS).length;
+    const player = ENTITIES.PLAYERS[socket.id];
+
+    LC.drawText({
+        text: `Players: ${playerCount}`,
+        pos: [35, 45],
+        color: 'white',
+        font: '16px Arial'
+    });
+
+    if (player) {
+        LC.drawText({
+            text: `Pos: (${Math.round(player.pos.x)}, ${Math.round(player.pos.y)})`,
+            pos: [35, 70],
+            color: 'white',
+            font: '16px Arial'
+        });
+    }
+};
+
+// chat input
 const input = document.createElement('input');
 Object.assign(input.style, {
     position: 'absolute',

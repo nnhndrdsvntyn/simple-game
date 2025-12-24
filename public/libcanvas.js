@@ -39,7 +39,8 @@ class LibCanvas {
         pos = [0, 0],
         size = [100, 100],
         color = 'black',
-        transparency = 1
+        transparency = 1,
+        cornerRadius = 0
     } = {}) {
         if (!Array.isArray(pos) || pos.length !== 2) {
             throw new Error('pos must be a 2 element array for drawRect');
@@ -53,15 +54,32 @@ class LibCanvas {
         if (typeof transparency !== 'number' || transparency < 0 || transparency > 1) {
             throw new Error('transparency must be a number between 0 and 1 for drawRect');
         }
+        if (typeof cornerRadius !== 'number' || cornerRadius < 0) {
+            throw new Error('cornerRadius must be a non-negative number for drawRect');
+        }
 
         const [x, y] = pos;
         const [width, height] = size;
+
         this.ctx.fillStyle = color;
         this.ctx.globalAlpha = transparency;
-        this.ctx.fillRect(x, y, width, height);
+        if (cornerRadius > 0) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x + cornerRadius, y);
+            this.ctx.lineTo(x + width - cornerRadius, y);
+            this.ctx.quadraticCurveTo(x + width, y, x + width, y + cornerRadius);
+            this.ctx.lineTo(x + width, y + height - cornerRadius);
+            this.ctx.quadraticCurveTo(x + width, y + height, x + width - cornerRadius, y + height);
+            this.ctx.lineTo(x + cornerRadius, y + height);
+            this.ctx.quadraticCurveTo(x, y + height, x, y + height - cornerRadius);
+            this.ctx.lineTo(x, y + cornerRadius);
+            this.ctx.quadraticCurveTo(x, y, x + cornerRadius, y);
+            this.ctx.fill();
+        } else {
+            this.ctx.fillRect(x, y, width, height);
+        }
         this.ctx.globalAlpha = 1;
     }
-
     drawCircle({
         pos = [0, 0],
         radius = 50,

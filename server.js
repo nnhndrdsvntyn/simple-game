@@ -43,7 +43,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on("chat", (d) => {
-        console.log(`${socket.id} said ${d.message}`);
         game.ENTITIES.PLAYERS[socket.id].setChat(d.message);
     })
 });

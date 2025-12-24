@@ -43,6 +43,10 @@ export class Player {
         // structures
         for (const id in game.ENTITIES.STRUCTURES) {
             const structure = game.ENTITIES.STRUCTURES[id];
+
+            // no collision for spawn zones
+            if (structure.type === 'spawn-zone') continue;
+
             const dx = this.pos.x - structure.pos.x;
             const dy = this.pos.y - structure.pos.y;
             const distance = Math.sqrt(dx * dx + dy * dy);

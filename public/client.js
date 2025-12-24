@@ -4,18 +4,6 @@ window.ENTITIES = ENTITIES;
 import { Network } from './network.js';
 
 export const socket = io();
-socket.on("connect", () => {
-    socket.emit('keyInput', {
-        key: 'a',
-        state: true,
-    });
-    setTimeout(() => {
-        socket.emit('keyInput', {
-            key: 'a',
-            state: false,
-        });
-    }, 50);
-})
 const network = new Network(socket);
 
 export const LC = new LibCanvas();
@@ -46,11 +34,11 @@ window.addEventListener('keyup', (e) => {
 function render() {
     LC.clearCanvas();
 
-    // draw all players
-    for (const player of Object.values(ENTITIES.PLAYERS)) player.draw();
-
     // draw all structures
     for (const structure of Object.values(ENTITIES.STRUCTURES)) structure.draw();
+
+    // draw all players
+    for (const player of Object.values(ENTITIES.PLAYERS)) player.draw();
 
     requestAnimationFrame(render);
 }
