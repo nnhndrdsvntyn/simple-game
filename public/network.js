@@ -19,6 +19,7 @@ export class Network {
         for (const id in data.PLAYERS) {
             const player = data.PLAYERS[id];
             ENTITIES.PLAYERS[id] = new Player(player.id, player.pos);
+            ENTITIES.PLAYERS[id].chatMessage = player.chatMessage;
         }
 
         // populate structure list

@@ -71,3 +71,36 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
+
+// chat input button (bottom right, for mobile)
+const chatButton = document.createElement('button');
+Object.assign(chatButton.style, {
+    position: 'absolute',
+    bottom: '20px',
+    right: '20px',
+    padding: '10px 20px',
+    fontSize: '16px',
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    zIndex: '1000'
+});
+chatButton.textContent = 'CHAT';
+chatButton.addEventListener('click', () => {
+    if (input.style.display === 'block') {
+        const message = input.value.trim();
+        if (message) {
+            socket.emit('chat', {
+                message
+            });
+        }
+        input.value = '';
+        input.style.display = 'none';
+    } else {
+        input.style.display = 'block';
+        input.focus();
+    }
+});
+document.body.appendChild(chatButton);

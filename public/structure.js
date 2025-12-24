@@ -29,11 +29,13 @@ export class Structure {
             this.pos.y - cameraPos.y
         ];
 
+        /*
         LC.drawCircle({
             pos: screenPos,
             radius: this.radius,
             color: this.color
         });
+        */
 
         LC.drawImage({
             pos: [screenPos[0] - (this.radius), screenPos[1] - (this.radius)],
@@ -42,6 +44,6 @@ export class Structure {
                 this.radius * 2,
                 this.radius * 2
             ]
-        })
+        });
     }
 }
