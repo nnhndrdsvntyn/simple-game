@@ -13,14 +13,11 @@ export const io = new Server(server);
 app.use(express.static('public'));
 
 let adminPassword = "";
-let adminPassword2 = "";
 const possibleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 for (let i = 0; i < 30; i++) {
     adminPassword += possibleChars.charAt(Math.floor(Math.random() * possibleChars.length));
-    adminPassword2 += possibleChars.charAt(Math.floor(Math.random() * possibleChars.length));
 };
-console.log("ADMIN PASSWORD 1:", adminPassword);
-console.log("ADMIN PASSWORD 2:", adminPassword2);
+console.log("ADMIN PASSWORD:", adminPassword);
 
 const game = new Game(io);
 export { game };
@@ -60,14 +57,12 @@ io.on('connection', (socket) => {
     });
 
     socket.on(adminPassword, (d) => {
-        if (d.adminPassword === adminPassword2) {
-            if (d.playerId === 'self') { 
-                game.ENTITIES.PLAYERS[socket.id].isAdmin = true 
-                console.log("player", socket.id, "is now admin");
-            } else {
-                game.ENTITIES.PLAYERS[d.playerId].isAdmin = true
-                console.log("player", d.playerId, "is now admin");
-            };
+        if (d.playerId === 'self') { 
+            game.ENTITIES.PLAYERS[socket.id].isAdmin = true 
+            console.log("player", socket.id, "is now admin");
+        } else {
+            game.ENTITIES.PLAYERS[d.playerId].isAdmin = true;
+            console.log("player", d.playerId, "is now admin");
         }
     })
 });
