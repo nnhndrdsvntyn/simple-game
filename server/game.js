@@ -1,12 +1,16 @@
 import { Structure } from './structure.js';
 import { structureMap } from '../public/shared/structuremap.js';
+import { XP } from './xp.js';
+import { xpMap } from '../public/shared/xpmap.js';
+import { io } from '../server.js';
 
 export class Game {
     constructor(server) {
         this.io = server;
         this.ENTITIES = {
             PLAYERS: {},
-            STRUCTURES: {}
+            STRUCTURES: {},
+            XP_POINTS: {}
         }
 
         // generate structures and populate its list
@@ -29,6 +33,17 @@ export class Game {
                 y: Math.floor(Math.random() * (10000 - radius * 2)) + radius
             };
             this.newEntity('STRUCTURES', new Structure('rock1' + i, randomPos, 'rock1'));
+        }
+
+        // generate xp points and populate its list
+        for (let i = 1; i <= 100; i++) {
+            const radius = xpMap.get('green').radius;
+            let randomPos;
+            randomPos = {
+                x: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
+                y: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
+            }
+            this.newEntity('XP_POINTS', new XP('xp' + i, randomPos, 'green'), 'green');
         }
     }
     newEntity(type, entity) {

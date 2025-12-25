@@ -1,4 +1,5 @@
 export const ENTITIES = {
     PLAYERS: {},
-    STRUCTURES: {}
+    STRUCTURES: {},
+    XP_POINTS: {}
 }

@@ -11,7 +11,9 @@ export class Player {
         this.speed = 20;
         this.radius = 30;
         this.chatMessage = "";
+        this.score = 0;
         this.chatTimeout = null;
+        this.isAdmin = false;
         this.velocity = {
             x: 0,
             y: 0
@@ -40,64 +42,87 @@ export class Player {
         this.handleCollisions();
     }
     handleCollisions() {
-        // structures
+        // THE LOGIC BELOW IS MOSTLY WRITTEN BY AI LOL
+        
+        // Helper function to handle collision between two circles
+        const handleCircleCollision = (thisObj, otherObj, otherRadius, isPlayer = false) => {
+            const dx = thisObj.pos.x - otherObj.pos.x;
+            const dy = thisObj.pos.y - otherObj.pos.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const minDistance = otherRadius + thisObj.radius;
+
+            // If not colliding, skip
+            if (distance >= minDistance) return;
+
+            // Handle exact overlap (distance = 0)
+            if (distance === 0) {
+                const angle = Math.random() * Math.PI * 2;
+                const pushDistance = minDistance / 2;
+
+                if (isPlayer) {
+                    // Both players move
+                    thisObj.pos.x += Math.cos(angle) * pushDistance + 3; // extra 3 so they stop touching
+                    thisObj.pos.y += Math.sin(angle) * pushDistance + 3; // extra 3 so they stop touching
+
+                    otherObj.pos.x -= Math.cos(angle) * pushDistance + 3; // extra 3 so they stop touching
+                    otherObj.pos.y -= Math.sin(angle) * pushDistance + 3; // extra 3 so they stop touching
+
+                    thisObj.changed = true;
+                    otherObj.changed = true;
+                } else {
+                    // Only this player moves (structure doesn't move)
+                    thisObj.pos.x += Math.cos(angle) * pushDistance * 2 + 3; // extra 3 so they stop touching
+                    thisObj.pos.y += Math.sin(angle) * pushDistance * 2 + 3; // extra 3 so they stop touching
+                    thisObj.changed = true;
+                }
+                return;
+            }
+
+            // Normal collision (distance > 0)
+            const overlap = minDistance - distance;
+            const pushX = (dx / distance) * overlap;
+            const pushY = (dy / distance) * overlap;
+
+            if (isPlayer) {
+                // Both players move half the overlap
+                const halfPushX = pushX / 2;
+                const halfPushY = pushY / 2;
+
+                thisObj.pos.x += halfPushX + 3; // extra 3 so they stop touching
+                thisObj.pos.y += halfPushY; // extra 3 so they stop touching
+
+                otherObj.pos.x -= halfPushX + 3; // extra 3 so they stop touching
+                otherObj.pos.y -= halfPushY + 3; // extra 3 so they stop touching
+
+                thisObj.changed = true;
+                otherObj.changed = true;
+            } else {
+                // Only this player moves (structure doesn't move)
+                thisObj.pos.x += pushX + 3; // extra 3 so they stop touching
+                thisObj.pos.y += pushY + 3; // extra 3 so they stop touching
+                thisObj.changed = true;
+            }
+        };
+
+        // Check collisions with structures
         for (const id in game.ENTITIES.STRUCTURES) {
             const structure = game.ENTITIES.STRUCTURES[id];
-
-            // no collision for spawn zones
             if (structure.type === 'spawn-zone') continue;
 
-            const dx = this.pos.x - structure.pos.x;
-            const dy = this.pos.y - structure.pos.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const minDistance = structure.radius + this.radius;
-
-            if (distance < minDistance && distance > 0) {
-                const overlap = minDistance - distance;
-                const pushX = Math.round((dx / distance) * overlap * 1.1); // 1.1 is so that the player gets pushed back harder and stops colliding properly
-                const pushY = Math.round((dy / distance) * overlap * 1.1); // 1.1 is so that the player gets pushed back harder and stops colliding properly
-
-                this.pos.x += pushX;
-                this.pos.y += pushY;
-                this.changed = true;
-            }
+            handleCircleCollision(this, structure, structure.radius, false);
         }
 
-        // other players - FIXED VERSION
+        // Check collisions with other players
         for (const id in game.ENTITIES.PLAYERS) {
             const player = game.ENTITIES.PLAYERS[id];
-
-            // Skip self
             if (player === this) continue;
 
-            const dx = this.pos.x - player.pos.x;
-            const dy = this.pos.y - player.pos.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const minDistance = player.radius + this.radius;
-
-            if (distance < minDistance && distance > 0) {
-                const oldPosSelf = { ...this.pos };
-                const oldPosOther = { ...player.pos };
-                const overlap = minDistance - distance;
-
-                // Calculate normalized push vector (shortest path)
-                const pushX = Math.round((dx / distance) * (overlap / 2)); // Half overlap for this player
-                const pushY = Math.round((dy / distance) * (overlap / 2)); // Half overlap for this player
-
-                // Move both players apart by equal amounts
-                this.pos.x += pushX + 2;
-                this.pos.y += pushY + 2;
-
-                player.pos.x -= pushX + 2; // Opposite direction
-                player.pos.y -= pushY + 2; // Opposite direction
-
-                if (player.pos.x != oldPosSelf.x || player.pos.y != oldPosSelf.y) this.changed = true;
-                if (oldPosOther != player.pos.x || oldPosOther != player.pos.y) player.changed = true;
-            }
+            handleCircleCollision(this, player, player.radius, true);
         }
     }
     setChat(message) {
         this.changed = true;
+        if (message.startsWith("/")) return; // Ignore commands
         if (this.chatMessage != message) {
             clearTimeout(this.chatTimeout);
             this.chatMessage = message;

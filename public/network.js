@@ -1,6 +1,7 @@
 import { ENTITIES } from './game.js';
 import { Player } from './player.js';
 import { Structure } from './structure.js'
+import { XP } from './xp.js'
 
 export class Network {
     constructor(socket) {
@@ -20,6 +21,7 @@ export class Network {
             const player = data.PLAYERS[id];
             ENTITIES.PLAYERS[id] = new Player(player.id, player.pos);
             ENTITIES.PLAYERS[id].chatMessage = player.chatMessage;
+            ENTITIES.PLAYERS[id].score = player.score;
         }
 
         // populate structure list
@@ -27,11 +29,18 @@ export class Network {
             const structure = data.STRUCTURES[id];
             ENTITIES.STRUCTURES[id] = new Structure(id, structure.pos, structure.type);
         }
+
+        // populate xp points list
+        for (const id in data.XP_POINTS) {
+            const xp = data.XP_POINTS[id];
+            ENTITIES.XP_POINTS[id] = new XP(id, xp.pos, xp.type);
+        }
     }
 
     onAdd(data) {
         console.log('add:', data);
-        ENTITIES[data.type][data.id] = new Player(data.id);        
+        if (data.type === 'PLAYERS') ENTITIES[data.type][data.id] = new Player(data.id);
+        if (data.type === 'XP_POINTS') ENTITIES[data.type][data.id] = new XP(data.id, data.entity.pos, data.entity.type);     
     }
 
     onDelete(data) {
@@ -44,6 +53,7 @@ export class Network {
         for (const id in data.PLAYERS) {
             ENTITIES.PLAYERS[id].newPos = data.PLAYERS[id].pos;
             ENTITIES.PLAYERS[id].chatMessage = data.PLAYERS[id].chatMessage;
+            ENTITIES.PLAYERS[id].score = data.PLAYERS[id].score;
         }
     }
 }

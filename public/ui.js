@@ -33,6 +33,16 @@ export function renderGameInfo() {
             font: '16px Arial'
         });
     }
+
+    // draw player's current score at the bottom center of the screen
+    if (player) {
+        LC.drawText({
+            text: `Score: ${player.score}`,
+            pos: [LC.width / 2, LC.height - 20],
+            color: 'white',
+            font: '16px Arial'
+        })
+    }
 };
 
 // chat input

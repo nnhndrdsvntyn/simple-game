@@ -4,6 +4,7 @@ window.ENTITIES = ENTITIES;
 import { Network } from './network.js';
 
 export const socket = io();
+window.socket = socket;
 const network = new Network(socket);
 
 export const LC = new LibCanvas();
@@ -39,6 +40,9 @@ function render() {
 
     // draw all players
     for (const player of Object.values(ENTITIES.PLAYERS)) player.draw();
+
+    // draw all xp points
+    for (const xp of Object.values(ENTITIES.XP_POINTS)) xp.draw();
 
     requestAnimationFrame(render);
 }
