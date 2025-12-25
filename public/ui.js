@@ -63,6 +63,7 @@ Object.assign(input.style, {
     zIndex: '1000'
 });
 input.type = 'text';
+input.id = 'chatInputArea';
 input.placeholder = 'Type your message...';
 input.maxLength = 50;
 document.body.appendChild(input);

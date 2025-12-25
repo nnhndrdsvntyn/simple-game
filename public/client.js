@@ -20,6 +20,9 @@ window.camera = camera;
 export { camera };
 
 window.addEventListener('keydown', (e) => {
+    const input = document.getElementById('chatInputArea');
+    if (input === document.activeElement) return;
+    
     if (!'wasd'.includes(e.key.toLowerCase())) return;
     
     socket.emit('keyInput', {
@@ -29,6 +32,9 @@ window.addEventListener('keydown', (e) => {
 });
 
 window.addEventListener('keyup', (e) => {
+    const input = document.getElementById('chatInputArea');
+    if (input === document.activeElement) return;
+    
     if (!'wasd'.includes(e.key.toLowerCase())) return;
     
     socket.emit('keyInput', {
