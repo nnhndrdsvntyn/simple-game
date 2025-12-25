@@ -4,6 +4,9 @@ window.ENTITIES = ENTITIES;
 import { Network } from './network.js';
 
 export const socket = io();
+socket.on("connect", () => {
+    render();
+})
 window.socket = socket;
 const network = new Network(socket);
 
@@ -11,7 +14,9 @@ export const LC = new LibCanvas();
 const camera = {
     width: LC.width,
     height: LC.height,
+    target: { pos: { x: 0, y: 0 } },
 }
+window.camera = camera;
 export { camera };
 
 window.addEventListener('keydown', (e) => {
@@ -53,4 +58,3 @@ function render() {
 
     requestAnimationFrame(render);
 }
-render();

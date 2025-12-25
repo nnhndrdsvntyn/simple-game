@@ -2,6 +2,7 @@ import { ENTITIES } from './game.js';
 import { Player } from './player.js';
 import { Structure } from './structure.js'
 import { XP } from './xp.js'
+import { camera } from './client.js';
 
 export class Network {
     constructor(socket) {
@@ -24,6 +25,9 @@ export class Network {
             ENTITIES.PLAYERS[id].score = player.score;
         }
 
+        // ensure camera follows the local player
+        if (ENTITIES.PLAYERS[socket.id]) camera.target = ENTITIES.PLAYERS[socket.id];
+
         // populate structure list
         for (const id in data.STRUCTURES) {
             const structure = data.STRUCTURES[id];
@@ -39,7 +43,9 @@ export class Network {
 
     onAdd(data) {
         console.log('add:', data);
-        if (data.type === 'PLAYERS') ENTITIES[data.type][data.id] = new Player(data.id);
+        if (data.type === 'PLAYERS') {
+            ENTITIES[data.type][data.id] = new Player(data.id);
+        }
         if (data.type === 'XP_POINTS') ENTITIES[data.type][data.id] = new XP(data.id, data.entity.pos, data.entity.type);     
     }
 
@@ -54,6 +60,7 @@ export class Network {
             ENTITIES.PLAYERS[id].newPos = data.PLAYERS[id].pos;
             ENTITIES.PLAYERS[id].chatMessage = data.PLAYERS[id].chatMessage;
             ENTITIES.PLAYERS[id].newScore = data.PLAYERS[id].score;
+            ENTITIES.PLAYERS[id].newRadius = data.PLAYERS[id].radius;
         }
     }
 }

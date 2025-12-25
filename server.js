@@ -89,7 +89,8 @@ function update() {
             id: player.id,
             pos: player.pos,
             chatMessage: player.chatMessage,
-            score: player.score
+            score: player.score,
+            radius: player.radius
         };
         player.changed = false;
     }

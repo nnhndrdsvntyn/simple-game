@@ -18,15 +18,9 @@ export class XP {
         });
     }
     draw = function() {
-        const localPlayer = ENTITIES.PLAYERS[socket.id];
-        const cameraPos = {
-            x: localPlayer.pos.x - (camera.width / 2),
-            y: localPlayer.pos.y - (camera.height / 2)
-        }
-        
         const screenPos = [
-            this.pos.x - cameraPos.x,
-            this.pos.y - cameraPos.y
+            this.pos.x - (camera.target.pos.x - camera.width / 2),
+            this.pos.y - (camera.target.pos.y  - camera.height / 2)
         ];
 
         /*

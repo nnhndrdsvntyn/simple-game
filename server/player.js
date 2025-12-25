@@ -39,7 +39,14 @@ export class Player {
         this.pos.x += this.velocity.x;
         this.pos.y += this.velocity.y;
         if (this.pos.x !== oldPos.x || this.pos.y !== oldPos.y) this.changed = true;
+
         this.handleCollisions();
+
+        // clamp player inside map
+        if (this.pos.x < 0) this.pos.x = 0;
+        if (this.pos.x > 10000) this.pos.x = 10000;
+        if (this.pos.y < 0) this.pos.y = 0;
+        if (this.pos.y > 10000) this.pos.y = 10000;
     }
     handleCollisions() {
         // THE LOGIC BELOW IS MOSTLY WRITTEN BY AI LOL

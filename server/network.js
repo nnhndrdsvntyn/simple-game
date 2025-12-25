@@ -103,6 +103,36 @@ export function checkParseCommand(chat, socket) {
             }
         }
     }
+
+    else if (command === '/setscore') {
+        // Format: /setscore (playerId, score)
+        const match = fullArgs.match(/\(\s*(self|[a-zA-Z0-9_]+)\s*,\s*(\d+)\s*\)/);
+        if (match) {
+            const [, playerId, score] = match;
+            const player = getPlayer(playerId);
+            
+            if (player) {
+                player.score = parseInt(score);
+                player.changed = true;
+                return { command, args: [playerId, score] };
+            }
+        }
+    }
+
+    else if (command === '/setradius') {
+        // Format: /setradius (playerId, radius)
+        const match = fullArgs.match(/\(\s*(self|[a-zA-Z0-9_]+)\s*,\s*(\d+)\s*\)/);
+        if (match) {
+            const [, playerId, radius] = match;
+            const player = getPlayer(playerId);
+            
+            if (player) {
+                player.radius = parseInt(radius);
+                player.changed = true;
+                return { command, args: [playerId, radius] };
+            }
+        }
+    }
     
     return null;
 }

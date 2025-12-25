@@ -19,6 +19,7 @@ export class Player {
     }) {
         this.id = id;
         this.radius = 30;
+        this.newRadius = 30;
         this.score = 0;
         this.newScore = 0;
         this.pos = pos;
@@ -29,23 +30,18 @@ export class Player {
         this.color = (this.id === socket.id) ? 'blue' : 'red'; // blue if local player, red if its another player
     }
     draw = function() {
-        // interpolate from pos to newPos
+        // interpolate from pos to newPos — but bypass interpolation when camera is snapped
         const lerpSpeedOrWhatever = 0.3;
         this.pos.x += (this.newPos.x - this.pos.x) * lerpSpeedOrWhatever;
         this.pos.y += (this.newPos.y - this.pos.y) * lerpSpeedOrWhatever;
 
-        const localPlayer = ENTITIES.PLAYERS[socket.id];
-        const cameraPos = {
-            x: localPlayer.pos.x - (camera.width / 2),
-            y: localPlayer.pos.y - (camera.height / 2)
-        };
-
         const screenPos = [
-            this.pos.x - cameraPos.x,
-            this.pos.y - cameraPos.y
+            this.pos.x - (camera.target.pos.x - camera.width / 2),
+            this.pos.y - (camera.target.pos.y - camera.height / 2)
         ];
 
-
+        // interpolate from radius to newRadius
+        this.radius += (this.newRadius - this.radius) * lerpSpeedOrWhatever;
         // simulate black outline on player by drawing a bigger blacker circle first
         LC.drawCircle({
             pos: screenPos,

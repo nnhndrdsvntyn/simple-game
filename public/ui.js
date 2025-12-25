@@ -36,7 +36,7 @@ export function renderGameInfo() {
 
     // draw player's current score at the bottom center of the screen
     // interpolate from score to newScore
-    const lerpSpeedOrWhatever = 0.3;
+    const lerpSpeedOrWhatever = 0.2;
     player.score += (player.newScore - player.score) * lerpSpeedOrWhatever;
     if (player) {
         LC.drawText({
