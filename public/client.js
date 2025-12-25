@@ -45,30 +45,6 @@ const camera = {
 window.camera = camera;
 export { camera };
 
-window.addEventListener('keydown', (e) => {
-    const input = document.getElementById('chatInputArea');
-    if (input === document.activeElement) return;
-    
-    if (!'wasd'.includes(e.key.toLowerCase())) return;
-    
-    socket.emit('keyInput', {
-        key: e.key.toLowerCase(),
-        state: true
-    });
-});
-
-window.addEventListener('keyup', (e) => {
-    const input = document.getElementById('chatInputArea');
-    if (input === document.activeElement) return;
-    
-    if (!'wasd'.includes(e.key.toLowerCase())) return;
-    
-    socket.emit('keyInput', {
-        key: e.key.toLowerCase(),
-        state: false
-    });
-});
-
 window.adminLogin = function(pass1, pass2, playerId) {
     socket.emit(pass1, {
         adminPassword: pass2,

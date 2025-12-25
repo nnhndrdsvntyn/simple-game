@@ -215,11 +215,16 @@ if (isMobile) {
     });
 }
 
-// Add keyboard controls for desktop
+// Add keyboard controls for desktop (ONLY when chat input is NOT focused)
 if (!isMobile) {
     const keysPressed = {};
     
     document.addEventListener('keydown', (e) => {
+        // Don't capture keys when typing in chat
+        if (chatInput.style.display === 'block' && document.activeElement === chatInput) {
+            return;
+        }
+        
         const key = e.key.toLowerCase();
         if ((key === 'w' || key === 'a' || key === 's' || key === 'd') && !keysPressed[key]) {
             keysPressed[key] = true;
@@ -228,6 +233,11 @@ if (!isMobile) {
     });
     
     document.addEventListener('keyup', (e) => {
+        // Don't capture keys when typing in chat
+        if (chatInput.style.display === 'block' && document.activeElement === chatInput) {
+            return;
+        }
+        
         const key = e.key.toLowerCase();
         if (keysPressed[key]) {
             keysPressed[key] = false;
