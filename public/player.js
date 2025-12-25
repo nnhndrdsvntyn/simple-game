@@ -19,7 +19,8 @@ export class Player {
     }) {
         this.id = id;
         this.radius = 30;
-        this.score = 30;
+        this.score = 0;
+        this.newScore = 0;
         this.pos = pos;
         this.newPos = {
             ...this.pos

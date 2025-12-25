@@ -35,9 +35,12 @@ export function renderGameInfo() {
     }
 
     // draw player's current score at the bottom center of the screen
+    // interpolate from score to newScore
+    const lerpSpeedOrWhatever = 0.3;
+    player.score += (player.newScore - player.score) * lerpSpeedOrWhatever;
     if (player) {
         LC.drawText({
-            text: `Score: ${player.score}`,
+            text: `Score: ${player.score.toFixed(0)}`,
             pos: [LC.width / 2, LC.height - 20],
             color: 'white',
             font: '16px Arial'

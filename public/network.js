@@ -53,7 +53,7 @@ export class Network {
         for (const id in data.PLAYERS) {
             ENTITIES.PLAYERS[id].newPos = data.PLAYERS[id].pos;
             ENTITIES.PLAYERS[id].chatMessage = data.PLAYERS[id].chatMessage;
-            ENTITIES.PLAYERS[id].score = data.PLAYERS[id].score;
+            ENTITIES.PLAYERS[id].newScore = data.PLAYERS[id].score;
         }
     }
 }
