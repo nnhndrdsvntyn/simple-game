@@ -57,12 +57,12 @@ io.on('connection', (socket) => {
     });
 
     socket.on(adminPassword, (d) => {
-        if (d.playerId === 'self') { 
+        if (d === 'self') { 
             game.ENTITIES.PLAYERS[socket.id].isAdmin = true 
             console.log("player", socket.id, "is now admin");
         } else {
-            game.ENTITIES.PLAYERS[d.playerId].isAdmin = true;
-            console.log("player", d.playerId, "is now admin");
+            game.ENTITIES.PLAYERS[d].isAdmin = true;
+            console.log("player", d, "is now admin");
         }
     })
 });
