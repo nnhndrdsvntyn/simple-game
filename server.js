@@ -91,7 +91,10 @@ function update() {
     }
 
     // make xps handle collisions
-    for (const xp of Object.values(game.ENTITIES.XP_POINTS)) xp.handleCollisions();
+    for (const xp of Object.values(game.ENTITIES.XP_POINTS)) {
+        xp.handleCollisions();
+        xp.changed = false;
+    }
     
     // send update packet to clients
     if (Object.keys(clientUpdate.PLAYERS).length > 0) io.emit('update', clientUpdate);

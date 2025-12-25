@@ -36,7 +36,8 @@ export class Game {
         }
 
         // generate xp points and populate its list
-        for (let i = 1; i <= 100; i++) {
+        // green
+        for (let i = 1; i <= 300; i++) {
             const radius = xpMap.get('green').radius;
             let randomPos;
             randomPos = {
@@ -44,6 +45,39 @@ export class Game {
                 y: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
             }
             this.newEntity('XP_POINTS', new XP('xp' + i, randomPos, 'green'), 'green');
+        }
+
+        // red
+        for (let i = 1; i <= 150; i++) {
+            const radius = xpMap.get('red').radius;
+            let randomPos;
+            randomPos = {
+                x: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
+                y: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
+            }
+            this.newEntity('XP_POINTS', new XP('xp' + i, randomPos, 'red'), 'red');
+        }
+
+        // blue
+        for (let i = 1; i <= 75; i++) {
+            const radius = xpMap.get('blue').radius;
+            let randomPos;
+            randomPos = {
+                x: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
+                y: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
+            }
+            this.newEntity('XP_POINTS', new XP('xp' + i, randomPos, 'blue'), 'blue');
+        }
+
+        // pruple
+        for (let i = 1; i <= 35; i++) {
+            const radius = xpMap.get('purple').radius;
+            let randomPos;
+            randomPos = {
+                x: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
+                y: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
+            }
+            this.newEntity('XP_POINTS', new XP('xp' + i, randomPos, 'purple'), 'purple');
         }
     }
     newEntity(type, entity) {

@@ -11,10 +11,27 @@ window.socket = socket;
 const network = new Network(socket);
 
 export const LC = new LibCanvas();
+window.LC = LC;
 const camera = {
     width: LC.width,
     height: LC.height,
     target: { pos: { x: 0, y: 0 } },
+    zoomIn: function(amount) {
+        LC.width -= amount;
+        LC.height -= amount;
+        LC.canvas.width -= amount;
+        LC.canvas.height -= amount;
+        camera.height -= amount;
+        camera.width -= amount;
+    },
+    zoomOut: function(amount) {
+        LC.width += amount;
+        LC.height += amount;
+        LC.canvas.width += amount;
+        LC.canvas.height += amount;
+        camera.height += amount;
+        camera.width += amount;
+    }
 }
 window.camera = camera;
 export { camera };
@@ -56,11 +73,11 @@ function render() {
     // draw all structures
     for (const structure of Object.values(ENTITIES.STRUCTURES)) structure.draw();
 
-    // draw all players
-    for (const player of Object.values(ENTITIES.PLAYERS)) player.draw();
-
     // draw all xp points
     for (const xp of Object.values(ENTITIES.XP_POINTS)) xp.draw();
+
+    // draw all players
+    for (const player of Object.values(ENTITIES.PLAYERS)) player.draw();
 
     requestAnimationFrame(render);
 }

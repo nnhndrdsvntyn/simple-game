@@ -11,6 +11,7 @@ import {
     LC
 } from './client.js';
 import { renderGameInfo } from './ui.js';
+import { playerMap } from './shared/playermap.js';
 
 export class Player {
     constructor(id, pos = {
@@ -28,9 +29,13 @@ export class Player {
         };
         this.chatMessage = "";
         this.color = (this.id === socket.id) ? 'blue' : 'red'; // blue if local player, red if its another player
+        LC.loadImage({
+            name: 'player-default',
+            src: playerMap.get('player-default').imgSrc
+        });
     }
     draw = function() {
-        // interpolate from pos to newPos — but bypass interpolation when camera is snapped
+        // interpolate from pos to newPosd
         const lerpSpeedOrWhatever = 0.3;
         this.pos.x += (this.newPos.x - this.pos.x) * lerpSpeedOrWhatever;
         this.pos.y += (this.newPos.y - this.pos.y) * lerpSpeedOrWhatever;
@@ -42,6 +47,15 @@ export class Player {
 
         // interpolate from radius to newRadius
         this.radius += (this.newRadius - this.radius) * lerpSpeedOrWhatever;
+
+
+        LC.drawImage({
+            pos: [screenPos[0] - (this.radius), screenPos[1] - (this.radius)],
+            name: 'player-default',
+            size: [this.radius * 2, this.radius * 2]
+        })
+        
+        /*
         // simulate black outline on player by drawing a bigger blacker circle first
         LC.drawCircle({
             pos: screenPos,
@@ -54,6 +68,7 @@ export class Player {
             radius: this.radius,
             color: this.color
         });
+        */
 
         // draw chat message bubble if its not empty
         if (this.chatMessage != '') {

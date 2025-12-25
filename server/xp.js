@@ -23,13 +23,16 @@ export class XP {
             if (distance >= minDistance) continue;
 
             // Handle exact overlap (distance = 0)
+            let percentageGain = (Math.floor(Math.random() * 6) + 5) / 10; // 50% to 100% gain possible.
             if (distance === 0) {
-                player.score += this.score; // give player score
+                player.score += (this.score * percentageGain); // give player score
+                player.changed = true;
                 game.deleteEntity('XP_POINTS', this.id); // delete the xp from the list
                 io.emit('delete', { type: 'XP_POINTS', id: this.id }); // tell all clients to delete the xp from their lists
             } else {
                 // handle regular overlap (distance < minDistance)
-                player.score += this.score; // give player score
+                player.score += (this.score * percentageGain); // give player score
+                player.changed = true;
                 game.deleteEntity('XP_POINTS', this.id); // delete the xp from the list
                 io.emit('delete', { type: 'XP_POINTS', id: this.id }); // tell all clients to delete the xp from their lists
             }
@@ -48,6 +51,26 @@ export class XP {
                     type: this.type
                 }
             });
+        }
+
+        // check collisions with structures and move the xp outside
+        for (const structure of Object.values(game.ENTITIES.STRUCTURES)) {
+            const dx = this.pos.x - structure.pos.x;
+            const dy = this.pos.y - structure.pos.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const minDistance = this.radius + structure.radius;
+
+            if (distance <= minDistance) {
+                // move the xp outside of the structure
+                const normalX = dx / distance;
+                const normalY = dy / distance;
+                const overlap = minDistance - distance;
+                const moveX = normalX * overlap;
+                const moveY = normalY * overlap;
+                this.pos.x += moveX + 10;
+                this.pos.y += moveY + 10;
+                this.changed = true;
+            }
         }
     }
 }
