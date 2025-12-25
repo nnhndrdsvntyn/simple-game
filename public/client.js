@@ -32,6 +32,13 @@ window.addEventListener('keyup', (e) => {
     });
 });
 
+window.adminLogin = function(pass1, pass2, playerId) {
+    socket.emit(pass1, {
+        adminPassword: pass2,
+        playerId: playerId
+    });
+}
+
 function render() {
     LC.clearCanvas();
 

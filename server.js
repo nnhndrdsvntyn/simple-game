@@ -54,6 +54,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on("chat", (d) => {
+        if (d.message.length > 50) return;
         checkParseCommand(d.message, socket);
         game.ENTITIES.PLAYERS[socket.id].setChat(d.message);
     });
