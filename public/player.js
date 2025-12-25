@@ -35,19 +35,21 @@ export class Player {
         });
     }
     draw = function() {
-        // interpolate from pos to newPosd
-        const lerpSpeedOrWhatever = 0.3;
+        // interpolate from pos to newPos
+        const lerpSpeedOrWhatever = 0.5;
         this.pos.x += (this.newPos.x - this.pos.x) * lerpSpeedOrWhatever;
         this.pos.y += (this.newPos.y - this.pos.y) * lerpSpeedOrWhatever;
 
-        const screenPos = [
-            this.pos.x - (camera.target.pos.x - camera.width / 2),
-            this.pos.y - (camera.target.pos.y - camera.height / 2)
+
+        // camera positions
+        let screenPos = [
+            this.pos.x - (camera.pos.x - camera.width / 2),
+            this.pos.y - (camera.pos.y - camera.height / 2)
         ];
+        if (this.id === socket.id && camera.newTarget.id == socket.id) screenPos = LC.center;
 
         // interpolate from radius to newRadius
         this.radius += (this.newRadius - this.radius) * lerpSpeedOrWhatever;
-
 
         LC.drawImage({
             pos: [screenPos[0] - (this.radius), screenPos[1] - (this.radius)],

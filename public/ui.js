@@ -1,30 +1,27 @@
-import {
-    socket
-} from './client.js';
-
+import { socket } from './client.js';
 import { ENTITIES } from './game.js';
-
 import { LC } from './client.js';
-// render game info top left of the screen
+
+// Game info rendering
 export function renderGameInfo() {
-    // Simple info panel with background
+    const playerCount = Object.keys(ENTITIES.PLAYERS).length;
+    const player = ENTITIES.PLAYERS[socket.id];
+    
+    // Draw info panel
     LC.drawRect({
         pos: [20, 20],
         size: [180, 60],
         color: 'rgba(0, 0, 0, 0.7)',
         cornerRadius: 5
     });
-
-    const playerCount = Object.keys(ENTITIES.PLAYERS).length;
-    const player = ENTITIES.PLAYERS[socket.id];
-
+    
     LC.drawText({
         text: `Players: ${playerCount}`,
         pos: [35, 45],
         color: 'white',
         font: '16px Arial'
     });
-
+    
     if (player) {
         LC.drawText({
             text: `Pos: (${Math.round(player.pos.x)}, ${Math.round(player.pos.y)})`,
@@ -33,238 +30,198 @@ export function renderGameInfo() {
             font: '16px Arial'
         });
     }
-
-    // draw player's current score at the bottom center of the screen
-    // interpolate from score to newScore
-    const lerpSpeedOrWhatever = 0.2;
-    player.score += (player.newScore - player.score) * lerpSpeedOrWhatever;
+    
+    // Draw score
     if (player) {
+        player.score += (player.newScore - player.score) * 0.2;
         LC.drawText({
             text: `Score: ${player.score.toFixed(0)}`,
             pos: [LC.width / 2, LC.height - 20],
             color: 'white',
             font: '16px Arial'
-        })
+        });
     }
 };
 
-// chat input
-const input = document.createElement('input');
-Object.assign(input.style, {
-    position: 'absolute',
-    top: '60%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    padding: '10px',
-    fontSize: '16px',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    display: 'none',
-    zIndex: '1000'
-});
-input.type = 'text';
-input.id = 'chatInputArea';
-input.placeholder = 'Type your message...';
-input.maxLength = 50;
-document.body.appendChild(input);
+// Chat input (simplified)
+export function createChatInput() {
+    const input = document.createElement('input');
+    input.style.cssText = `
+        position: absolute;
+        top: 60%; left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        display: none;
+        z-index: 1000;
+    `;
+    input.type = 'text';
+    input.placeholder = 'Type message...';
+    input.maxLength = 50;
+    
+    return input;
+}
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-        if (input.style.display === 'none') {
-            input.style.display = 'block';
-            input.focus();
+// Chat button (simplified)
+export function createChatButton() {
+    const button = document.createElement('button');
+    button.style.cssText = `
+        position: absolute;
+        bottom: 20px; right: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        z-index: 1000;
+    `;
+    button.textContent = 'CHAT';
+    
+    return button;
+}
+
+// Joystick (simplified)
+export function createJoystick() {
+    const container = document.createElement('div');
+    const knob = document.createElement('div');
+    
+    container.style.cssText = `
+        position: fixed;
+        left: 40px; bottom: 40px;
+        width: 150px; height: 150px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.3);
+        z-index: 1000;
+        touch-action: none;
+    `;
+    
+    knob.style.cssText = `
+        width: 60px; height: 60px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.7);
+        position: absolute;
+        top: 45px; left: 45px;
+        cursor: pointer;
+        touch-action: none;
+    `;
+    
+    container.appendChild(knob);
+    return { container, knob };
+}
+
+// Simple joystick logic
+export function setupJoystick(container, knob) {
+    let activeKeys = new Set();
+    let isDragging = false;
+    
+    const sendKey = (key, state) => {
+        socket.emit('keyInput', { key, state });
+    };
+    
+    const updateMovement = (clientX, clientY) => {
+        const rect = container.getBoundingClientRect();
+        const centerX = rect.left + 75;
+        const centerY = rect.top + 75;
+        const deltaX = clientX - centerX;
+        const deltaY = clientY - centerY;
+        const distance = Math.min(Math.sqrt(deltaX*deltaX + deltaY*deltaY), 50);
+        
+        if (distance === 0) return;
+        
+        // Move knob
+        knob.style.transform = `translate(${deltaX * (50/distance)}px, ${deltaY * (50/distance)}px)`;
+        
+        // Calculate direction
+        const normX = deltaX / distance;
+        const normY = deltaY / distance;
+        const newKeys = new Set();
+        
+        if (normY < -0.3) newKeys.add('w');
+        if (normY > 0.3) newKeys.add('s');
+        if (normX < -0.3) newKeys.add('a');
+        if (normX > 0.3) newKeys.add('d');
+        
+        // Update keys
+        activeKeys.forEach(key => !newKeys.has(key) && sendKey(key, false));
+        newKeys.forEach(key => !activeKeys.has(key) && sendKey(key, true));
+        activeKeys = newKeys;
+    };
+    
+    const resetJoystick = () => {
+        knob.style.transform = 'translate(0, 0)';
+        activeKeys.forEach(key => sendKey(key, false));
+        activeKeys.clear();
+        isDragging = false;
+    };
+    
+    // Event handlers
+    const startDrag = (e) => {
+        e.preventDefault();
+        isDragging = true;
+    };
+    
+    const moveDrag = (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const coords = e.touches ? e.touches[0] : e;
+        updateMovement(coords.clientX, coords.clientY);
+    };
+    
+    const endDrag = (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        resetJoystick();
+    };
+    
+    // Attach events
+    knob.addEventListener('mousedown', startDrag);
+    knob.addEventListener('touchstart', startDrag);
+    document.addEventListener('mousemove', moveDrag);
+    document.addEventListener('touchmove', moveDrag);
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+}
+
+// Initialize everything
+export function initUI() {
+    // Chat system
+    const chatInput = createChatInput();
+    const chatButton = createChatButton();
+    document.body.append(chatInput, chatButton);
+    
+    // Chat logic
+    chatButton.onclick = () => {
+        if (chatInput.style.display === 'block') {
+            const msg = chatInput.value.trim();
+            if (msg) socket.emit('chat', { message: msg });
+            chatInput.value = '';
+            chatInput.style.display = 'none';
         } else {
-            const message = input.value.trim();
-            if (message) {
-                socket.emit('chat', {
-                    message
-                });
+            chatInput.style.display = 'block';
+            chatInput.focus();
+        }
+    };
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            if (chatInput.style.display === 'none') {
+                chatInput.style.display = 'block';
+                chatInput.focus();
+            } else {
+                const msg = chatInput.value.trim();
+                if (msg) socket.emit('chat', { message: msg });
+                chatInput.value = '';
+                chatInput.style.display = 'none';
             }
-            input.value = '';
-            input.style.display = 'none';
-        }
-    }
-});
-
-// chat input button (bottom right, for mobile)
-const chatButton = document.createElement('button');
-Object.assign(chatButton.style, {
-    position: 'absolute',
-    bottom: '20px',
-    right: '20px',
-    padding: '10px 20px',
-    fontSize: '16px',
-    backgroundColor: '#4CAF50',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    zIndex: '1000'
-});
-chatButton.textContent = 'CHAT';
-chatButton.addEventListener('click', () => {
-    if (input.style.display === 'block') {
-        const message = input.value.trim();
-        if (message) {
-            socket.emit('chat', {
-                message
-            });
-        }
-        input.value = '';
-        input.style.display = 'none';
-    } else {
-        input.style.display = 'block';
-        input.focus();
-    }
-});
-document.body.appendChild(chatButton);
-
-
-// Create joystick container
-const joystickContainer = document.createElement('div');
-document.body.appendChild(joystickContainer);
-
-joystickContainer.style.cssText = `
-    position: fixed;
-    left: 40px;
-    bottom: 40px;
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.3);
-    z-index: 1000;
-    touch-action: none;
-`;
-
-// Create joystick knob
-const joystickKnob = document.createElement('div');
-joystickContainer.appendChild(joystickKnob);
-
-joystickKnob.style.cssText = `
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.7);
-    position: absolute;
-    top: 45px;
-    left: 45px;
-    cursor: pointer;
-    touch-action: none;
-    user-select: none;
-`;
-
-const sendKey = (key, state) => {
-    socket.emit('keyInput', { key, state });
-};
-
-let isDragging = false;
-let activeKeys = new Set();
-let startX = 0, startY = 0;
-
-const updateMovement = (clientX, clientY) => {
-    const containerRect = joystickContainer.getBoundingClientRect();
-    const centerX = containerRect.left + 75;
-    const centerY = containerRect.top + 75;
-    
-    // Calculate delta from center
-    const deltaX = clientX - centerX;
-    const deltaY = clientY - centerY;
-    
-    // Limit movement to 50px max
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const maxDistance = 50;
-    const limitedDistance = Math.min(distance, maxDistance);
-    
-    if (limitedDistance === 0) return;
-    
-    // Calculate knob position
-    const ratio = limitedDistance / distance;
-    const knobX = deltaX * ratio;
-    const knobY = deltaY * ratio;
-    
-    // Move knob
-    joystickKnob.style.transform = `translate(${knobX}px, ${knobY}px)`;
-    
-    // Determine direction (using 0.3 threshold)
-    const normX = deltaX / limitedDistance;
-    const normY = deltaY / limitedDistance;
-    
-    const newActiveKeys = new Set();
-    
-    // Up/Down
-    if (normY < -0.3) {
-        newActiveKeys.add('w');
-    } else if (normY > 0.3) {
-        newActiveKeys.add('s');
-    }
-    
-    // Left/Right
-    if (normX < -0.3) {
-        newActiveKeys.add('a');
-    } else if (normX > 0.3) {
-        newActiveKeys.add('d');
-    }
-    
-    // Send keyup for keys that are no longer active
-    activeKeys.forEach(key => {
-        if (!newActiveKeys.has(key)) {
-            sendKey(key, false);
         }
     });
     
-    // Send keydown for new active keys
-    newActiveKeys.forEach(key => {
-        if (!activeKeys.has(key)) {
-            sendKey(key, true);
-        }
-    });
-    
-    activeKeys = newActiveKeys;
-};
-
-const resetJoystick = () => {
-    joystickKnob.style.transform = 'translate(0px, 0px)';
-    activeKeys.forEach(key => {
-        sendKey(key, false);
-    });
-    activeKeys.clear();
-    isDragging = false;
-};
-
-// Touch events
-joystickKnob.ontouchstart = (e) => {
-    e.preventDefault();
-    isDragging = true;
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-};
-
-document.ontouchmove = (e) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    updateMovement(e.touches[0].clientX, e.touches[0].clientY);
-};
-
-document.ontouchend = (e) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    resetJoystick();
-};
-
-// Mouse events
-joystickKnob.onmousedown = (e) => {
-    e.preventDefault();
-    isDragging = true;
-    startX = e.clientX;
-    startY = e.clientY;
-};
-
-document.onmousemove = (e) => {
-    if (!isDragging) return;
-    updateMovement(e.clientX, e.clientY);
-};
-
-document.onmouseup = () => {
-    if (!isDragging) return;
-    resetJoystick();
-};
+    // Joystick
+    const { container, knob } = createJoystick();
+    document.body.appendChild(container);
+    setupJoystick(container, knob);
+}

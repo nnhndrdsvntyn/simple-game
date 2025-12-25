@@ -19,8 +19,8 @@ export class Structure {
     }
     draw = function() {
         const screenPos = [
-            this.pos.x - (camera.target.pos.x - camera.width / 2),
-            this.pos.y - (camera.target.pos.y - camera.height / 2)
+            this.pos.x - (camera.pos.x - camera.width / 2),
+            this.pos.y - (camera.pos.y - camera.height / 2)
         ];
 
         /*

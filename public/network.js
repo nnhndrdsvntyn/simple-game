@@ -26,7 +26,9 @@ export class Network {
         }
 
         // ensure camera follows the local player
-        if (ENTITIES.PLAYERS[socket.id]) camera.target = ENTITIES.PLAYERS[socket.id];
+        setTimeout(() => {
+            if (ENTITIES.PLAYERS[socket.id]) camera.setTarget(ENTITIES.PLAYERS[socket.id]);
+        }, 100);
 
         // populate structure list
         for (const id in data.STRUCTURES) {

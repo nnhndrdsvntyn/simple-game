@@ -15,7 +15,11 @@ window.LC = LC;
 const camera = {
     width: LC.width,
     height: LC.height,
-    target: { pos: { x: 0, y: 0 } },
+    newTarget: { pos: {x: 0, y: 0} },
+    pos: { x: 0, y: 0},
+    setTarget: function (target) {
+        this.newTarget = target; 
+    },
     zoomIn: function(amount) {
         LC.width -= amount;
         LC.height -= amount;
@@ -31,6 +35,11 @@ const camera = {
         LC.canvas.height += amount;
         camera.height += amount;
         camera.width += amount;
+    },
+    update: function() {
+        // lerp from target to newTarget
+        camera.pos.x += (camera.newTarget.pos.x - camera.pos.x) * 0.3;
+        camera.pos.y += (camera.newTarget.pos.y - camera.pos.y) * 0.3;
     }
 }
 window.camera = camera;
@@ -68,6 +77,8 @@ window.adminLogin = function(pass1, pass2, playerId) {
 }
 
 function render() {
+    camera.update();
+    
     LC.clearCanvas();
 
     // draw all structures
