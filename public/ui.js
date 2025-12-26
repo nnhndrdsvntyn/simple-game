@@ -245,3 +245,11 @@ if (!isMobile) {
         }
     });
 }
+
+window.addEventListener('mousedown', () => {
+    socket.emit('mouseLeft');
+})
+
+window.addEventListener('touchstart', () => {
+    socket.emit('mouseLeft');
+});

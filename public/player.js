@@ -24,6 +24,8 @@ export class Player {
         this.score = 0;
         this.newScore = 0;
         this.pos = pos;
+        this.newAngle = 0;
+        this.angle = 0;
         this.newPos = {
             ...this.pos
         };
@@ -56,6 +58,18 @@ export class Player {
             name: 'player-default',
             size: [this.radius * 2, this.radius * 2]
         })
+
+        // draw a red orb in front of the player based on their angle
+        const angle = this.angle * (Math.PI / 180);
+        const orbPos = [
+            screenPos[0] + Math.cos(angle) * this.radius,
+            screenPos[1] + Math.sin(angle) * this.radius
+        ];
+        LC.drawCircle({
+            pos: orbPos,
+            radius: 5,
+            color: 'red'
+        });
         
         /*
         // simulate black outline on player by drawing a bigger blacker circle first

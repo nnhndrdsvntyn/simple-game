@@ -6,7 +6,8 @@ export function buildInitPacket() {
     const initPacket = {
         PLAYERS: {},
         STRUCTURES: {},
-        XP_POINTS: {}
+        XP_POINTS: {},
+        PROJECTILES: {}
     };
 
     // client-ify players (only send position, id, and chat message)
@@ -14,8 +15,10 @@ export function buildInitPacket() {
         initPacket['PLAYERS'][player.id] = {
             id: player.id,
             pos: player.pos,
+            radius: player.radius,
             chatMessage: player.chatMessage,
-            score: player.score
+            score: player.score,
+            angle: player.angle
         };
     });
 
@@ -27,6 +30,11 @@ export function buildInitPacket() {
     // send xp points data to clients
     Object.values(game.ENTITIES.XP_POINTS).forEach(xp => {
         initPacket['XP_POINTS'][xp.id] = xp;
+    });
+
+    // send projectile data to clients
+    Object.values(game.ENTITIES.PROJECTILES).forEach(projectile => {
+        initPacket['PROJECTILES'][projectile.id] = projectile;
     });
 
     // return the init packet

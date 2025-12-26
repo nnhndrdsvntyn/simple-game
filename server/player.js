@@ -1,6 +1,7 @@
 import {
     game
 } from '../server.js';
+
 export class Player {
     constructor(id) {
         this.id = id;
@@ -138,5 +139,10 @@ export class Player {
                 this.changed = true;
             }, 10000) // 10 second chat duration before clearing
         }
+    }
+
+    setAngle(angle) {
+        this.angle = angle;
+        this.changed = true;
     }
 }

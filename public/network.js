@@ -2,6 +2,7 @@ import { ENTITIES } from './game.js';
 import { Player } from './player.js';
 import { Structure } from './structure.js'
 import { XP } from './xp.js'
+import { Projectile } from './projectile.js'
 import { camera } from './client.js';
 
 export class Network {
@@ -22,7 +23,9 @@ export class Network {
             const player = data.PLAYERS[id];
             ENTITIES.PLAYERS[id] = new Player(player.id, player.pos);
             ENTITIES.PLAYERS[id].chatMessage = player.chatMessage;
-            ENTITIES.PLAYERS[id].score = player.score;
+            ENTITIES.PLAYERS[id].newScore = player.score;
+            ENTITIES.PLAYERS[id].newRadius = player.radius;
+            ENTITIES.PLAYERS[id].angle = player.angle;
         }
 
         // ensure camera follows the local player
@@ -41,6 +44,13 @@ export class Network {
             const xp = data.XP_POINTS[id];
             ENTITIES.XP_POINTS[id] = new XP(id, xp.pos, xp.type);
         }
+
+        // populate projectile list
+        console.log(data.PROJECTILES);
+        for (const id in data.PROJECTILES) {
+            const projectile = data.PROJECTILES[id];
+            ENTITIES.PROJECTILES[id] = new Projectile(id, projectile.pos, projectile.angle, projectile.type);
+        }
     }
 
     onAdd(data) {
@@ -48,7 +58,8 @@ export class Network {
         if (data.type === 'PLAYERS') {
             ENTITIES[data.type][data.id] = new Player(data.id);
         }
-        if (data.type === 'XP_POINTS') ENTITIES[data.type][data.id] = new XP(data.id, data.entity.pos, data.entity.type);     
+        if (data.type === 'XP_POINTS') ENTITIES[data.type][data.id] = new XP(data.id, data.entity.pos, data.entity.type);
+        if (data.type === 'PROJECTILES') ENTITIES[data.type][data.id] = new Projectile(data.id, data.entity.pos, data.entity.angle, data.entity.type);     
     }
 
     onDelete(data) {
@@ -58,11 +69,23 @@ export class Network {
 
     onUpdate(data) {
         console.log('update:', data);
+        
+        // update players
         for (const id in data.PLAYERS) {
             ENTITIES.PLAYERS[id].newPos = data.PLAYERS[id].pos;
             ENTITIES.PLAYERS[id].chatMessage = data.PLAYERS[id].chatMessage;
             ENTITIES.PLAYERS[id].newScore = data.PLAYERS[id].score;
             ENTITIES.PLAYERS[id].newRadius = data.PLAYERS[id].radius;
+            ENTITIES.PLAYERS[id].angle = data.PLAYERS[id].angle;
+        }
+
+        // update projectile's position
+        for (const id in data.PROJECTILES) {
+            if (!ENTITIES.PROJECTILES[id]) {
+                console.warn("Projectile not yet created on client:", id);
+                continue; // skip projectiless that aren't created yet
+            }
+            ENTITIES.PROJECTILES[id].newPos = data.PROJECTILES[id].pos;
         }
     }
 }

@@ -3,6 +3,17 @@ class LibCanvas {
         this.images = {};
         [this.width, this.height] = [1440, 760];
         this.createDOM();
+
+        this._mouseX = window.innerWidth / 2;
+        this._mouseY = window.innerHeight / 2;
+        this.canvas.addEventListener('mousemove', (e) => {
+            let centerX = window.innerWidth / 2;
+            let centerY = window.innerHeight / 2;
+            
+            this._mouseX = e.clientX;
+            this._mouseY = e.clientY;
+            socket.emit('setAngle', Math.atan2(this._mouseY - centerY, this._mouseX - centerX) * (180 / Math.PI));
+        });
     }
 
     createDOM() {
@@ -179,6 +190,7 @@ class LibCanvas {
         name,
         pos = [0, 0],
         size,
+        rotation = 0,
         transparency = 1
     } = {}) {
         if (name === undefined) {
@@ -190,6 +202,9 @@ class LibCanvas {
         if (!Array.isArray(size) || size.length !== 2) {
             throw new Error('size must be a 2 element array for drawImage');
         }
+        if (typeof rotation !== 'number' || rotation < -180 || rotation > 180) {
+            throw new Error('rotation must be a number between -180 and 180 for drawImage');
+        }
         if (!this.images[name]) {
             // throw new Error(`image ${name} needs to be loaded before it can be drawn.`);
 
@@ -199,12 +214,27 @@ class LibCanvas {
 
         const [x, y] = pos;
         const [width, height] = size;
+        const halfWidth = width / 2;
+        const halfHeight = height / 2;
+        this.ctx.save();
+        this.ctx.translate(x + halfWidth, y + halfHeight);
+        this.ctx.rotate(rotation * (Math.PI / 180));
         this.ctx.globalAlpha = transparency;
-        this.ctx.drawImage(this.images[name], x, y, width, height);
+        this.ctx.drawImage(this.images[name], -halfWidth, -halfHeight, width, height);
         this.ctx.globalAlpha = 1;
+        this.ctx.restore();
     }
 
     get center() {
         return [this.width / 2, this.height / 2];
+    }
+
+    get mouseAngle() {
+        // Canvas center
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+    
+        // Calculate angle
+        return Math.atan2(this._mouseY - centerY, this._mouseX - centerX) * (180 / Math.PI);
     }
 }

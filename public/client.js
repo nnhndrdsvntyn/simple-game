@@ -1,17 +1,20 @@
 import { ENTITIES } from './game.js';
 window.ENTITIES = ENTITIES;
+const document = window.document;
+export { document };
 
 import { Network } from './network.js';
 
 export const socket = io();
 socket.on("connect", () => {
     render();
-})
+});
 window.socket = socket;
 const network = new Network(socket);
 
 export const LC = new LibCanvas();
 window.LC = LC;
+
 const camera = {
     width: LC.width,
     height: LC.height,
@@ -65,6 +68,9 @@ function render() {
 
     // draw all players
     for (const player of Object.values(ENTITIES.PLAYERS)) player.draw();
+
+    // draw all projectiles
+    for (const projectile of Object.values(ENTITIES.PROJECTILES)) projectile.draw();
 
     requestAnimationFrame(render);
 }

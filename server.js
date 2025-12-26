@@ -3,6 +3,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import { Game } from './server/game.js';
 import { Player } from './server/player.js';
+import { Projectile } from './server/projectile.js';
 import { buildInitPacket } from './server/network.js';
 import { checkParseCommand } from './server/network.js';
 
@@ -50,11 +51,27 @@ io.on('connection', (socket) => {
         game.ENTITIES.PLAYERS[socket.id].keys[d.key] = d.state;
     });
 
+    socket.on("setAngle", (angle) => {
+        game.ENTITIES.PLAYERS[socket.id].setAngle(Math.round(angle));
+    });
+
     socket.on("chat", (d) => {
         if (d.message.length > 50) return;
         checkParseCommand(d.message, socket);
         game.ENTITIES.PLAYERS[socket.id].setChat(d.message);
     });
+
+    socket.on("mouseLeft", () => {
+        let player = game.ENTITIES.PLAYERS[socket.id];
+        let id = Math.random().toString();
+        let projectile = new Projectile(id, { ... player.pos} , player.angle, 'bullet');
+        game.ENTITIES.PROJECTILES[id] = projectile;
+        io.emit('add', {
+            type: 'PROJECTILES',
+            id: id,
+            entity: projectile
+        });
+    })
 
     socket.on(adminPassword, (d) => {
         if (d === 'self') { 
@@ -74,6 +91,7 @@ function update() {
         PLAYERS: {},
         STRUCTURES: {},
         XP_POINTS: {},
+        PROJECTILES: {}
     };
     
     // update and add players to clientUpdate if they actually changed
@@ -85,7 +103,8 @@ function update() {
             pos: player.pos,
             chatMessage: player.chatMessage,
             score: player.score,
-            radius: player.radius
+            radius: player.radius,
+            angle: player.angle
         };
         player.changed = false;
     }
@@ -95,9 +114,15 @@ function update() {
         xp.handleCollisions();
         xp.changed = false;
     }
+
+    // move projectiles
+    for (const projectile of Object.values(game.ENTITIES.PROJECTILES)) {
+        projectile.move();
+        clientUpdate.PROJECTILES[projectile.id] = projectile;
+    }
     
     // send update packet to clients
-    if (Object.keys(clientUpdate.PLAYERS).length > 0) io.emit('update', clientUpdate);
+    if (Object.keys(clientUpdate.PLAYERS).length > 0 || Object.keys(clientUpdate.PROJECTILES).length > 0) io.emit('update', clientUpdate);
 }
 setInterval(update, 1000 / 20);
 

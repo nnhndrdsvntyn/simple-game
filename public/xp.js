@@ -37,7 +37,7 @@ export class XP {
             size: [
                 this.radius * 2,
                 this.radius * 2
-            ]
+            ],
         });
     }
 }

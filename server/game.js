@@ -10,7 +10,8 @@ export class Game {
         this.ENTITIES = {
             PLAYERS: {},
             STRUCTURES: {},
-            XP_POINTS: {}
+            XP_POINTS: {},
+            PROJECTILES: {}
         }
 
         // generate structures and populate its list
@@ -86,5 +87,9 @@ export class Game {
 
     deleteEntity(type, id) {
         delete this.ENTITIES[type][id];
+        io.emit('delete', {
+            type: type,
+            id: id
+        })
     }
 }
