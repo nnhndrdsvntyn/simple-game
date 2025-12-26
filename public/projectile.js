@@ -24,7 +24,7 @@ export class Projectile {
             this.pos.x - (camera.pos.x - camera.width / 2),
             this.pos.y - (camera.pos.y  - camera.height / 2)
         ];
-        
+    
         LC.drawImage({
             name: this.type,
             pos: [screenPos[0] - this.radius, screenPos[1] - this.radius],

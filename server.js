@@ -64,7 +64,7 @@ io.on('connection', (socket) => {
     socket.on("mouseLeft", () => {
         let player = game.ENTITIES.PLAYERS[socket.id];
         let id = Math.random().toString();
-        let projectile = new Projectile(id, { ... player.pos} , player.angle, 'bullet');
+        let projectile = new Projectile(id, { ... player.pos} , player.angle, 'bullet', socket.id);
         game.ENTITIES.PROJECTILES[id] = projectile;
         io.emit('add', {
             type: 'PROJECTILES',
