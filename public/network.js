@@ -50,7 +50,7 @@ export class Network {
         console.log(data.PROJECTILES);
         for (const id in data.PROJECTILES) {
             const projectile = data.PROJECTILES[id];
-            ENTITIES.PROJECTILES[id] = new Projectile(id, projectile.pos, projectile.angle, projectile.type);
+            ENTITIES.PROJECTILES[id] = new Projectile(id, projectile.pos, projectile.angle, projectile.type, projectile.radius);
         }
     }
 
@@ -81,13 +81,14 @@ export class Network {
             ENTITIES.PLAYERS[id].hasShield = data.PLAYERS[id].hasShield;
         }
 
-        // update projectile's position
+        // update projectile's position and radius
         for (const id in data.PROJECTILES) {
             if (!ENTITIES.PROJECTILES[id]) {
                 // if its not created, then skip it
                 continue;
             }
             ENTITIES.PROJECTILES[id].newPos = data.PROJECTILES[id].pos;
+            ENTITIES.PROJECTILES[id].radius = data.PROJECTILES[id].radius;
         }
     }
 }

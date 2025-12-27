@@ -154,7 +154,8 @@ function update() {
             id: projectile.id,
             pos: projectile.pos,
             angle: projectile.angle,
-            type: projectile.type
+            type: projectile.type,
+            radius: projectile.radius
         };
     }
     

@@ -14,7 +14,6 @@ entityMap.set('pebble', {
     imgSrc: images['pebble'],
     radius: 10,
     knockbackStrength: 30,
-    imgDimensions: { width: 10 * 2, height: 10 * 2 }
 });
 
 // Structure

@@ -173,7 +173,7 @@ export class Player {
 
     attack() {
         const id = Math.random().toString();
-        const projectile = new Projectile(id, { ...this.pos }, this.angle, 'pebble', this.id);
+        const projectile = new Projectile(id, { ...this.pos }, this.angle, 'pebble', this.id, this.radius / 2);
         game.ENTITIES.PROJECTILES[id] = projectile;
         io.emit('add', {
             type: 'PROJECTILES',
@@ -182,7 +182,8 @@ export class Player {
                 id: projectile.id,
                 pos: projectile.pos,
                 angle: projectile.angle,
-                type: projectile.type
+                type: projectile.type,
+                radius: projectile.radius
             }
         });
     }

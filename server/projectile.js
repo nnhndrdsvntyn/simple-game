@@ -7,14 +7,14 @@ import {
 import { entityMap } from '../public/shared/entitymap.js';
 
 export class Projectile {
-    constructor(id, pos, angle, type, shooterId) {
+    constructor(id, pos, angle, type, shooterId, radius) {
         this.id = id;
         this.pos = pos;
         this.shooterId = shooterId;
         this.type = type;
-        this.radius = entityMap.get(type).radius;
+        this.radius = Math.max(10, radius); // minimum radius is 10
         this.angle = angle
-        this.speed = 30;
+        this.speed = 50 / (this.radius / 30);
         // despawn projectile after 0.750 second
         this.despawnTimer = setTimeout(() => {
             this.delete();
