@@ -173,7 +173,15 @@ export class Player {
 
     attack() {
         const id = Math.random().toString();
-        const projectile = new Projectile(id, { ...this.pos }, this.angle, 'pebble', this.id, this.radius / 2);
+        const angleInRadians = this.angle * (Math.PI / 180);
+        const projectileRadius = this.radius / 2;
+        // Spawn distance from player center. Player radius + projectile radius.
+        const spawnDistance = this.radius + projectileRadius; 
+
+        const projectileX = this.pos.x + Math.cos(angleInRadians) * spawnDistance; // spawn outside player
+        const projectileY = this.pos.y + Math.sin(angleInRadians) * spawnDistance; // spawn outside player
+
+        const projectile = new Projectile(id, { x: projectileX, y: projectileY }, this.angle, 'pebble', this.id, projectileRadius);
         game.ENTITIES.PROJECTILES[id] = projectile;
         io.emit('add', {
             type: 'PROJECTILES',
