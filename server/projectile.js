@@ -49,7 +49,7 @@ export class Projectile {
                     player.pos.x, player.pos.y, player.radius
                 )) {
                 // Knock player back
-                const knockbackStrength = entityMap.get(this.type).knockbackStrength;
+                const knockbackStrength = game.ENTITIES.PLAYERS[this.shooterId].radius;
                 player.pos.x += Math.cos(rad) * knockbackStrength;
                 player.pos.y += Math.sin(rad) * knockbackStrength;
                 player.changed = true;
