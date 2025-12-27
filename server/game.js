@@ -1,7 +1,6 @@
 import { Structure } from './structure.js';
-import { structureMap } from '../public/shared/structuremap.js';
+import { entityMap } from '../public/shared/entitymap.js';
 import { XP } from './xp.js';
-import { xpMap } from '../public/shared/xpmap.js';
 import { io } from '../server.js';
 
 export class Game {
@@ -17,7 +16,7 @@ export class Game {
         // generate structures and populate its list
         // spawn zone (1)
         for (let i = 1; i <= 1; i++) {
-            const radius = structureMap.get('spawn-zone').radius;
+            const radius = entityMap.get('spawn-zone').radius;
             let pos = {
                 x: 5000,
                 y: 5000
@@ -27,7 +26,7 @@ export class Game {
         
         // rock1 (50)
         for (let i = 1; i <= 50; i++) {
-            const radius = structureMap.get('rock1').radius;
+            const radius = entityMap.get('rock1').radius;
             let randomPos;
             randomPos = {
                 x: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
@@ -39,7 +38,7 @@ export class Game {
         // generate xp points and populate its list
         // green
         for (let i = 1; i <= 300; i++) {
-            const radius = xpMap.get('green').radius;
+            const radius = entityMap.get('green').radius;
             let randomPos;
             randomPos = {
                 x: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
@@ -50,7 +49,7 @@ export class Game {
 
         // red
         for (let i = 1; i <= 150; i++) {
-            const radius = xpMap.get('red').radius;
+            const radius = entityMap.get('red').radius;
             let randomPos;
             randomPos = {
                 x: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
@@ -61,7 +60,7 @@ export class Game {
 
         // blue
         for (let i = 1; i <= 75; i++) {
-            const radius = xpMap.get('blue').radius;
+            const radius = entityMap.get('blue').radius;
             let randomPos;
             randomPos = {
                 x: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
@@ -72,7 +71,7 @@ export class Game {
 
         // pruple
         for (let i = 1; i <= 35; i++) {
-            const radius = xpMap.get('purple').radius;
+            const radius = entityMap.get('purple').radius;
             let randomPos;
             randomPos = {
                 x: Math.floor(Math.random() * (10000 - radius * 2)) + radius,

@@ -11,7 +11,7 @@ import {
     LC
 } from './client.js';
 import { renderGameInfo } from './ui.js';
-import { playerMap } from './shared/playermap.js';
+import { entityMap } from '../shared/entitymap.js';
 
 export class Player {
     constructor(id, pos = {
@@ -33,8 +33,12 @@ export class Player {
         this.color = (this.id === socket.id) ? 'blue' : 'red'; // blue if local player, red if its another player
         LC.loadImage({
             name: 'player-default',
-            src: playerMap.get('player-default').imgSrc
+            src: entityMap.get('player-default').imgSrc
         });
+        LC.loadImage({
+            name: 'spawn-zone-shield',
+            src: './images/spawn-zone-shield.png'
+        })
     }
     draw = function() {
         // interpolate from pos to newPos
@@ -53,17 +57,32 @@ export class Player {
         // interpolate from radius to newRadius
         this.radius += (this.newRadius - this.radius) * lerpSpeedOrWhatever;
 
+        // if the player has a shield, draw the shield image on top of them
+        if (this.hasShield) {
+            LC.drawImage({
+                pos: [screenPos[0] - (this.radius * 1.5), screenPos[1] - (this.radius) * 1.5],
+                name: 'spawn-zone-shield',
+                size: [this.radius * 3, this.radius * 3],
+                transparency: 0.5
+            });
+        }
+
         LC.drawImage({
             pos: [screenPos[0] - (this.radius), screenPos[1] - (this.radius)],
             name: 'player-default',
             size: [this.radius * 2, this.radius * 2]
-        })
+        });
+
+        // interpolate from angle to newAngle
+        // bulkier logic to fix interpolation bug with angles
+        this.angle += (((this.newAngle - this.angle + 540) % 360 - 180) * lerpSpeedOrWhatever);
+        this.angle = ((this.angle + 540) % 360) - 180;
 
         // draw a red orb in front of the player based on their angle
         const angle = this.angle * (Math.PI / 180);
         const orbPos = [
-            screenPos[0] + Math.cos(angle) * this.radius,
-            screenPos[1] + Math.sin(angle) * this.radius
+            screenPos[0] + Math.cos(angle) * (this.radius * 1.25),
+            screenPos[1] + Math.sin(angle) * (this.radius * 1.25)
         ];
         LC.drawCircle({
             pos: orbPos,

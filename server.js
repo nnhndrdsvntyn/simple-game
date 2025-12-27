@@ -5,6 +5,7 @@ import { Game } from './server/game.js';
 import { Player } from './server/player.js';
 import { Projectile } from './server/projectile.js';
 import { buildInitPacket } from './server/network.js';
+import { verifyPacket } from './server/network.js';
 import { checkParseCommand } from './server/network.js';
 
 const app = express();
@@ -39,38 +40,55 @@ io.on('connection', (socket) => {
 
     socket.on("disconnect", () => {
         game.deleteEntity('PLAYERS', socket.id);
-
-        // send other clients a delete packet
-        socket.broadcast.emit('delete', {
-            type: 'PLAYERS',
-            id: socket.id
-        })
     });
 
     socket.on("keyInput", (d) => {
+        // verify if packet is valid, if not, kick for cheating.
+        if (!verifyPacket('keyInput', d)) {
+            socket.disconnect(); // kick for cheating.
+            return;
+        }
+        
         game.ENTITIES.PLAYERS[socket.id].keys[d.key] = d.state;
     });
 
     socket.on("setAngle", (angle) => {
-        game.ENTITIES.PLAYERS[socket.id].setAngle(Math.round(angle));
+        let correctAngle = angle;
+        
+        // if angle is 0, set it to a number very close to 0,
+        // so that the the server doesn't pass it to the packet verifier as a false boolean
+        // JS Auto converts 0 => false
+        if (angle === 0) correctAngle = 0.001;
+        
+        // verify if packet is valid, if not, kick for cheating.
+        if (!verifyPacket('setAngle', correctAngle)) {
+            socket.disconnect(); // kick for cheating.
+            return;
+        }
+
+        game.ENTITIES.PLAYERS[socket.id].setAngle(correctAngle);
     });
 
     socket.on("chat", (d) => {
-        if (d.message.length > 50) return;
-        checkParseCommand(d.message, socket);
-        game.ENTITIES.PLAYERS[socket.id].setChat(d.message);
+        // verify if packet is valid, if not, kick for cheating.
+        if (!verifyPacket('chat', d)) {
+            socket.disconnect(); // kick for cheating.
+            return;
+        }
+        
+        checkParseCommand(d, socket);
+        game.ENTITIES.PLAYERS[socket.id].setChat(d);
     });
 
-    socket.on("mouseLeft", () => {
+    socket.on("leftMouse", (d) => {
+        // verify if packet is valid, if not, kick for cheating.
+        if (!verifyPacket('leftMouse', d)) {
+            socket.disconnect(); // kick for cheating.
+            return;
+        }
+        
         let player = game.ENTITIES.PLAYERS[socket.id];
-        let id = Math.random().toString();
-        let projectile = new Projectile(id, { ... player.pos} , player.angle, 'bullet', socket.id);
-        game.ENTITIES.PROJECTILES[id] = projectile;
-        io.emit('add', {
-            type: 'PROJECTILES',
-            id: id,
-            entity: projectile
-        });
+        player.setAttack(d);
     })
 
     socket.on(adminPassword, (d) => {
@@ -104,7 +122,8 @@ function update() {
             chatMessage: player.chatMessage,
             score: player.score,
             radius: player.radius,
-            angle: player.angle
+            angle: player.angle,
+            hasShield: player.hasShield
         };
         player.changed = false;
     }
@@ -115,10 +134,28 @@ function update() {
         xp.changed = false;
     }
 
+    // make structures handle collisions
+    // rocks move out of spawn zone
+    for (const structure of Object.values(game.ENTITIES.STRUCTURES)) {
+        structure.handleCollisions();
+        if (structure.changed) clientUpdate.STRUCTURES[structure.id] = {
+            id: structure.id,
+            pos: structure.pos,
+            type: structure.type
+        };
+        structure.changed = false;
+    }
+
     // move projectiles
-    for (const projectile of Object.values(game.ENTITIES.PROJECTILES)) {
+    for (const id in game.ENTITIES.PROJECTILES) {
+        const projectile = game.ENTITIES.PROJECTILES[id];
         projectile.move();
-        clientUpdate.PROJECTILES[projectile.id] = projectile;
+        clientUpdate.PROJECTILES[id] = {
+            id: projectile.id,
+            pos: projectile.pos,
+            angle: projectile.angle,
+            type: projectile.type
+        };
     }
     
     // send update packet to clients

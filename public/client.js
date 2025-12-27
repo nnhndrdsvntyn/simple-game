@@ -7,8 +7,12 @@ import { Network } from './network.js';
 
 export const socket = io();
 socket.on("connect", () => {
+    socket.canSendPacket = true;
     render();
 });
+socket.on("disconnect", () => {
+    location.reload();
+})
 window.socket = socket;
 const network = new Network(socket);
 

@@ -1,14 +1,14 @@
 import { game } from '../server.js';
 import { io } from '../server.js';
-import { xpMap } from '../public/shared/xpmap.js'
+import { entityMap } from '../public/shared/entitymap.js'
 
 export class XP {
     constructor(id, pos, type) {
-        this.color = xpMap.get(type).color;
+        this.color = entityMap.get(type).color;
         this.id = id;
-        this.radius = xpMap.get(type).radius;
-        this.type = xpMap.get(type).type;
-        this.score = xpMap.get(type).score;
+        this.radius = entityMap.get(type).radius;
+        this.type = entityMap.get(type).type;
+        this.score = entityMap.get(type).score;
         this.pos = pos;
     }
     handleCollisions() {

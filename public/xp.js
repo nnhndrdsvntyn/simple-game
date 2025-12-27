@@ -2,19 +2,19 @@ import { socket } from './client.js';
 import { ENTITIES } from './game.js';
 import { camera } from './client.js';
 import { LC } from './client.js';
-import { xpMap } from './shared/xpmap.js';
+import { entityMap } from '../shared/entitymap.js';
 
 export class XP {
     constructor(id, pos, type) {
         this.id = id;
         this.pos = pos;
         this.type = type;
-        this.radius = xpMap.get(type).radius;
-        this.color = xpMap.get(type).color;
+        this.radius = entityMap.get(type).radius;
+        this.color = entityMap.get(type).color;
 
         LC.loadImage({
             name: this.type,
-            src: xpMap.get(type).imgSrc
+            src: entityMap.get(type).imgSrc
         });
     }
     draw = function() {

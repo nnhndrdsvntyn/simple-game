@@ -16,7 +16,7 @@ export class Network {
     }
 
     onInit(data) {
-        console.log('init:', data);
+        // console.log('init:', data);
 
         // populate player list
         for (const id in data.PLAYERS) {
@@ -26,6 +26,7 @@ export class Network {
             ENTITIES.PLAYERS[id].newScore = player.score;
             ENTITIES.PLAYERS[id].newRadius = player.radius;
             ENTITIES.PLAYERS[id].angle = player.angle;
+            ENTITIES.PLAYERS[id].hasShield = player.hasShield;
         }
 
         // ensure camera follows the local player
@@ -54,21 +55,21 @@ export class Network {
     }
 
     onAdd(data) {
-        console.log('add:', data);
+        // console.log('add:', data);
         if (data.type === 'PLAYERS') {
             ENTITIES[data.type][data.id] = new Player(data.id);
         }
         if (data.type === 'XP_POINTS') ENTITIES[data.type][data.id] = new XP(data.id, data.entity.pos, data.entity.type);
-        if (data.type === 'PROJECTILES') ENTITIES[data.type][data.id] = new Projectile(data.id, data.entity.pos, data.entity.angle, data.entity.type);     
+        if (data.type === 'PROJECTILES') ENTITIES[data.type][data.id] = new Projectile(data.id, data.entity.pos, data.entity.angle, data.entity.type);   
     }
 
     onDelete(data) {
-        console.log('delete:', data);
+        // console.log('delete:', data);
         delete ENTITIES[data.type][data.id];
     }
 
     onUpdate(data) {
-        console.log('update:', data);
+        // console.log('update:', data);
         
         // update players
         for (const id in data.PLAYERS) {
@@ -76,14 +77,15 @@ export class Network {
             ENTITIES.PLAYERS[id].chatMessage = data.PLAYERS[id].chatMessage;
             ENTITIES.PLAYERS[id].newScore = data.PLAYERS[id].score;
             ENTITIES.PLAYERS[id].newRadius = data.PLAYERS[id].radius;
-            ENTITIES.PLAYERS[id].angle = data.PLAYERS[id].angle;
+            ENTITIES.PLAYERS[id].newAngle = data.PLAYERS[id].angle;
+            ENTITIES.PLAYERS[id].hasShield = data.PLAYERS[id].hasShield;
         }
 
         // update projectile's position
         for (const id in data.PROJECTILES) {
             if (!ENTITIES.PROJECTILES[id]) {
-                console.warn("Projectile not yet created on client:", id);
-                continue; // skip projectiless that aren't created yet
+                // if its not created, then skip it
+                continue;
             }
             ENTITIES.PROJECTILES[id].newPos = data.PROJECTILES[id].pos;
         }

@@ -18,7 +18,8 @@ export function buildInitPacket() {
             radius: player.radius,
             chatMessage: player.chatMessage,
             score: player.score,
-            angle: player.angle
+            angle: player.angle,
+            hasShield: player.hasShield
         };
     });
 
@@ -39,6 +40,33 @@ export function buildInitPacket() {
 
     // return the init packet
     return initPacket;
+}
+
+export function verifyPacket(packet, data) {
+    if (data == null) return false;
+
+    if (packet === 'setAngle') {
+        if (typeof data != 'number') return false;
+        if (data < -180 || data > 180) return false
+
+        return true;
+    } else if (packet === 'keyInput') {
+        if (typeof data != 'object') return false;
+        if (typeof data.key != 'string') return false;
+        if (!"awsd".includes(data.key)) return false;
+        if (typeof data.state != 'boolean') return false;
+
+        return true;
+    } else if (packet === 'chat') {
+        if (typeof data != 'string') return false;
+        if (data.length > 50) return false;
+        
+        return true;
+    } else if (packet === 'leftMouse') {
+        if (typeof data != 'boolean') return false;
+
+        return true;
+    }
 }
 
 export function checkParseCommand(chat, socket) {

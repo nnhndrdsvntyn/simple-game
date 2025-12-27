@@ -1,6 +1,8 @@
 import {
     game
 } from '../server.js';
+import { Projectile } from './projectile.js';
+import { io } from '../server.js';
 
 export class Player {
     constructor(id) {
@@ -13,6 +15,10 @@ export class Player {
         this.radius = 30;
         this.chatMessage = "";
         this.score = 0;
+        this.angle = 0;
+        this.canAttack = true;
+        this.hasShield = true;
+        this.attackInterval = null;
         this.chatTimeout = null;
         this.isAdmin = false;
         this.velocity = {
@@ -51,7 +57,7 @@ export class Player {
     }
     handleCollisions() {
         // THE LOGIC BELOW IS MOSTLY WRITTEN BY AI LOL
-        
+
         // Helper function to handle collision between two circles
         const handleCircleCollision = (thisObj, otherObj, otherRadius, isPlayer = false) => {
             const dx = thisObj.pos.x - otherObj.pos.x;
@@ -112,18 +118,37 @@ export class Player {
             }
         };
 
+        let isCollidingWithSpawnZone = false;
         // Check collisions with structures
         for (const id in game.ENTITIES.STRUCTURES) {
             const structure = game.ENTITIES.STRUCTURES[id];
-            if (structure.type === 'spawn-zone') continue;
+            if (structure.type === 'spawn-zone') {
+                const dx = this.pos.x - structure.pos.x;
+                const dy = this.pos.y - structure.pos.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const minDistance = this.radius + structure.radius;
+                if (distance < minDistance) {
+                    isCollidingWithSpawnZone = true;
+                }
+            } else {
+                handleCircleCollision(this, structure, structure.radius, false);
+            }
+        }
 
-            handleCircleCollision(this, structure, structure.radius, false);
+        // give shield if inside spawn zone, and remove shield if not.
+        if (this.hasShield !== isCollidingWithSpawnZone) {
+            this.hasShield = isCollidingWithSpawnZone;
+            if (this.hasShield) {
+                clearInterval(this.attackInterval);
+                this.attackInterval = null;
+            }
+            this.changed = true;
         }
 
         // Check collisions with other players
         for (const id in game.ENTITIES.PLAYERS) {
             const player = game.ENTITIES.PLAYERS[id];
-            if (player === this) continue;
+            if (player === this) continue; // skip self
 
             handleCircleCollision(this, player, player.radius, true);
         }
@@ -145,4 +170,46 @@ export class Player {
         this.angle = angle;
         this.changed = true;
     }
+
+    attack() {
+        const id = Math.random().toString();
+        const projectile = new Projectile(id, { ...this.pos }, this.angle, 'pebble', this.id);
+        game.ENTITIES.PROJECTILES[id] = projectile;
+        io.emit('add', {
+            type: 'PROJECTILES',
+            id: id,
+            entity: {
+                id: projectile.id,
+                pos: projectile.pos,
+                angle: projectile.angle,
+                type: projectile.type
+            }
+        });
+    }
+
+    setAttack(state) {
+    if (state) {
+        if (this.hasShield) return;
+        // an interval already exists? then don't continue
+        if (this.attackInterval) return;
+
+        this.attackInterval = setInterval(() => {
+            if (!this.canAttack) return;
+            this.canAttack = false;
+            this.attack();
+            setTimeout(() => { this.canAttack = true; }, 250);
+        }, 250);
+
+        // trigger first attack immediately
+        if (this.canAttack) {
+            this.canAttack = false;
+            this.attack();
+            setTimeout(() => { this.canAttack = true; }, 250);
+        }
+
+    } else {
+        clearInterval(this.attackInterval);
+        this.attackInterval = null;
+    }
+}
 }

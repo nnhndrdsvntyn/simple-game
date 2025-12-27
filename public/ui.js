@@ -13,7 +13,7 @@ export function renderGameInfo() {
     // Draw info panel
     LC.drawRect({
         pos: [20, 20],
-        size: [180, 60],
+        size: [180, 90],
         color: 'rgba(0, 0, 0, 0.7)',
         cornerRadius: 5
     });
@@ -25,11 +25,22 @@ export function renderGameInfo() {
         font: '16px Arial'
     });
     
+    // draw player position
     if (player) {
         LC.drawText({
             text: `Pos: (${Math.round(player.pos.x)}, ${Math.round(player.pos.y)})`,
             pos: [35, 70],
             color: 'white',
+            font: '16px Arial'
+        });
+    }
+
+    // draw player angle
+    if (player) {
+        LC.drawText({
+            text: `(DEBUG) Angle: ${player.angle.toFixed(0)}`,
+            pos: [35, 95],
+            color: 'red',
             font: '16px Arial'
         });
     }
@@ -90,7 +101,7 @@ if (!isMobile) {
 chatButton.onclick = () => {
     if (chatInput.style.display === 'block') {
         const msg = chatInput.value.trim();
-        if (msg) socket.emit('chat', { message: msg });
+        if (msg) socket.emit('chat', msg);
         chatInput.value = '';
         chatInput.style.display = 'none';
     } else {
@@ -106,7 +117,7 @@ document.addEventListener('keydown', (e) => {
             chatInput.focus();
         } else {
             const msg = chatInput.value.trim();
-            if (msg) socket.emit('chat', { message: msg });
+            if (msg) socket.emit('chat', msg);
             chatInput.value = '';
             chatInput.style.display = 'none';
         }
@@ -218,22 +229,26 @@ if (isMobile) {
 // Add keyboard controls for desktop (ONLY when chat input is NOT focused)
 if (!isMobile) {
     const keysPressed = {};
+    const lastSentState = {}; // Track last sent state
     
     document.addEventListener('keydown', (e) => {
-        // Don't capture keys when typing in chat
         if (chatInput.style.display === 'block' && document.activeElement === chatInput) {
             return;
         }
         
         const key = e.key.toLowerCase();
-        if ((key === 'w' || key === 'a' || key === 's' || key === 'd') && !keysPressed[key]) {
-            keysPressed[key] = true;
-            socket.emit('keyInput', { key, state: true });
+        if ((key === 'w' || key === 'a' || key === 's' || key === 'd')) {
+            // Only send if state changed (key wasn't already pressed)
+            if (!keysPressed[key]) {
+                keysPressed[key] = true;
+                lastSentState[key] = true;
+
+                socket.emit('keyInput', { key, state: true });
+            }
         }
     });
     
     document.addEventListener('keyup', (e) => {
-        // Don't capture keys when typing in chat
         if (chatInput.style.display === 'block' && document.activeElement === chatInput) {
             return;
         }
@@ -241,15 +256,26 @@ if (!isMobile) {
         const key = e.key.toLowerCase();
         if (keysPressed[key]) {
             keysPressed[key] = false;
+            lastSentState[key] = false;
+
             socket.emit('keyInput', { key, state: false });
         }
     });
 }
 
+// for touch users
 window.addEventListener('mousedown', () => {
-    socket.emit('mouseLeft');
-})
+    socket.emit('leftMouse', true);
+});
+window.addEventListener('mouseup', () => {
+    socket.emit('leftMouse', false);
+});
 
+// for mouse users
 window.addEventListener('touchstart', () => {
-    socket.emit('mouseLeft');
+    socket.emit('leftMouse', true);
+});
+
+window.addEventListener('touchend', () => {
+    socket.emit('leftMouse', false);
 });

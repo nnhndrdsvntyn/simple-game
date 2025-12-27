@@ -7,12 +7,20 @@ class LibCanvas {
         this._mouseX = window.innerWidth / 2;
         this._mouseY = window.innerHeight / 2;
         this.canvas.addEventListener('mousemove', (e) => {
+            if (!socket.canSendPacket) return;
+            
+            socket.canSendPacket = false;
+            setTimeout(() => {
+                socket.canSendPacket = true;
+            }, 1000 / 30);
+            
             let centerX = window.innerWidth / 2;
             let centerY = window.innerHeight / 2;
             
             this._mouseX = e.clientX;
             this._mouseY = e.clientY;
-            socket.emit('setAngle', Math.atan2(this._mouseY - centerY, this._mouseX - centerX) * (180 / Math.PI));
+
+            socket.emit('setAngle', Math.round(Math.atan2(this._mouseY - centerY, this._mouseX - centerX) * (180 / Math.PI)));
         });
     }
 
