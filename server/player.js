@@ -1,8 +1,12 @@
 import {
     game
 } from '../server.js';
-import { Projectile } from './projectile.js';
-import { io } from '../server.js';
+import {
+    Projectile
+} from './projectile.js';
+import {
+    io
+} from '../server.js';
 
 export class Player {
     constructor(id) {
@@ -15,6 +19,8 @@ export class Player {
         this.radius = 30;
         this.chatMessage = "";
         this.score = 0;
+        this.health = 100;
+        this.maxHealth = 100;
         this.angle = 0;
         this.canAttack = true;
         this.hasShield = true;
@@ -153,6 +159,19 @@ export class Player {
             handleCircleCollision(this, player, player.radius, true);
         }
     }
+
+    die(killerId, type) {
+        // if this player died to another player
+        if (type === 'player') {
+            game.ENTITIES.PLAYERS[killerId].score += this.score; // give killer their score
+            game.ENTITIES.PLAYERS[killerId].changed = true;
+            this.pos.x = 5000; // send back to center of map
+            this.pos.y = 5000; // send back to center of map
+            this.health = this.maxHealth // reset health
+            this.score = 0; // reset score
+            this.changed = true
+        }
+    }
     setChat(message) {
         this.changed = true;
         if (message.startsWith("/")) return; // Ignore commands
@@ -176,12 +195,15 @@ export class Player {
         const angleInRadians = this.angle * (Math.PI / 180);
         const projectileRadius = this.radius / 2;
         // Spawn distance from player center. Player radius + projectile radius.
-        const spawnDistance = this.radius + projectileRadius; 
+        const spawnDistance = this.radius;
 
         const projectileX = this.pos.x + Math.cos(angleInRadians) * spawnDistance; // spawn outside player
         const projectileY = this.pos.y + Math.sin(angleInRadians) * spawnDistance; // spawn outside player
 
-        const projectile = new Projectile(id, { x: projectileX, y: projectileY }, this.angle, 'pebble', this.id, projectileRadius);
+        const projectile = new Projectile(id, {
+            x: projectileX,
+            y: projectileY
+        }, this.angle, 'pebble', this.id, 'player');
         game.ENTITIES.PROJECTILES[id] = projectile;
         io.emit('add', {
             type: 'PROJECTILES',
@@ -197,28 +219,32 @@ export class Player {
     }
 
     setAttack(state) {
-    if (state) {
-        if (this.hasShield) return;
-        // an interval already exists? then don't continue
-        if (this.attackInterval) return;
+        if (state) {
+            if (this.hasShield) return;
+            // an interval already exists? then don't continue
+            if (this.attackInterval) return;
 
-        this.attackInterval = setInterval(() => {
-            if (!this.canAttack) return;
-            this.canAttack = false;
-            this.attack();
-            setTimeout(() => { this.canAttack = true; }, 250);
-        }, 250);
+            this.attackInterval = setInterval(() => {
+                if (!this.canAttack) return;
+                this.canAttack = false;
+                this.attack();
+                setTimeout(() => {
+                    this.canAttack = true;
+                }, 250);
+            }, 250);
 
-        // trigger first attack immediately
-        if (this.canAttack) {
-            this.canAttack = false;
-            this.attack();
-            setTimeout(() => { this.canAttack = true; }, 250);
+            // trigger first attack immediately
+            if (this.canAttack) {
+                this.canAttack = false;
+                this.attack();
+                setTimeout(() => {
+                    this.canAttack = true;
+                }, 250);
+            }
+
+        } else {
+            clearInterval(this.attackInterval);
+            this.attackInterval = null;
         }
-
-    } else {
-        clearInterval(this.attackInterval);
-        this.attackInterval = null;
     }
-}
 }

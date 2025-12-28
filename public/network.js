@@ -27,6 +27,8 @@ export class Network {
             ENTITIES.PLAYERS[id].newRadius = player.radius;
             ENTITIES.PLAYERS[id].angle = player.angle;
             ENTITIES.PLAYERS[id].hasShield = player.hasShield;
+            ENTITIES.PLAYERS[id].newHealth = player.health;
+            ENTITIES.PLAYERS[id].maxHealth = player.maxHealth;
         }
 
         // ensure camera follows the local player
@@ -79,6 +81,8 @@ export class Network {
             ENTITIES.PLAYERS[id].newRadius = data.PLAYERS[id].radius;
             ENTITIES.PLAYERS[id].newAngle = data.PLAYERS[id].angle;
             ENTITIES.PLAYERS[id].hasShield = data.PLAYERS[id].hasShield;
+            ENTITIES.PLAYERS[id].newHealth = data.PLAYERS[id].health;
+            ENTITIES.PLAYERS[id].maxHealth = data.PLAYERS[id].maxHealth;
         }
 
         // update projectile's position and radius

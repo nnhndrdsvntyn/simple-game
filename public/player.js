@@ -23,6 +23,10 @@ export class Player {
         this.newRadius = 30;
         this.score = 0;
         this.newScore = 0;
+        this.hasShield = true;
+        this.health = null;
+        this.newHealth = null;
+        this.maxHealth = null;
         this.pos = pos;
         this.newAngle = 0;
         this.angle = 0;
@@ -88,6 +92,29 @@ export class Player {
             pos: orbPos,
             radius: 5,
             color: 'red'
+        });
+
+        // interpolate from heatlh to newHealth
+        this.health += (this.newHealth - this.health) * lerpSpeedOrWhatever;
+
+        const healthBarWidth = 50;
+        const healthBarHeight = 8;
+        const healthBarX = screenPos[0] - healthBarWidth / 2;
+        const healthBarY = screenPos[1] + this.radius + 10;
+
+        // Draw the background of the health bar (the "missing" health)
+        LC.drawRect({
+            pos: [healthBarX, healthBarY],
+            size: [healthBarWidth, healthBarHeight],
+            color: 'red'
+        });
+
+        // Draw the foreground of the health bar (the current health)
+        const currentHealthWidth = (this.health / this.maxHealth) * healthBarWidth;
+        LC.drawRect({
+            pos: [healthBarX, healthBarY],
+            size: [currentHealthWidth, healthBarHeight],
+            color: 'green'
         });
         
         /*

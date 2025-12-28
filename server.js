@@ -123,7 +123,9 @@ function update() {
             score: player.score,
             radius: player.radius,
             angle: player.angle,
-            hasShield: player.hasShield
+            hasShield: player.hasShield,
+            health: player.health,
+            maxHealth: player.maxHealth
         };
         player.changed = false;
     }

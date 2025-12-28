@@ -7,14 +7,15 @@ import {
 import { entityMap } from '../public/shared/entitymap.js';
 
 export class Projectile {
-    constructor(id, pos, angle, type, shooterId, radius) {
+    constructor(id, pos, angle, type, shooterId, shooterType) {
         this.id = id;
         this.pos = pos;
+        this.shooterType = shooterType;
         this.shooterId = shooterId;
         this.type = type;
-        this.radius = Math.max(10, radius); // minimum radius is 10
+        this.radius = 10
         this.angle = angle
-        this.speed = 50 / (this.radius / 30);
+        this.speed = 30;
         // despawn projectile after 0.750 second
         this.despawnTimer = setTimeout(() => {
             this.delete();
@@ -48,14 +49,18 @@ export class Projectile {
                     this.pos.x, this.pos.y, this.radius,
                     player.pos.x, player.pos.y, player.radius
                 )) {
-                // Knock player back
+                // Knock player back and damage them
                 const knockbackStrength = game.ENTITIES.PLAYERS[this.shooterId].radius;
                 player.pos.x += Math.cos(rad) * knockbackStrength;
                 player.pos.y += Math.sin(rad) * knockbackStrength;
+                player.health -= 10; // 0.5 damage
+                
+                // check if dead, and apply player.die() actions.
+                if (player.health <= 0) player.die(this.shooterId, this.shooterType);
                 player.changed = true;
 
-                this.delete();
-                return; // Stop checking after hit
+                this.delete(); // delete this projectile
+                return; // Stop checking after it hit something
             }
         }
 
@@ -67,8 +72,8 @@ export class Projectile {
                     this.pos.x, this.pos.y, this.radius,
                     structure.pos.x, structure.pos.y, structure.radius
                 )) {
-                this.delete();
-                return; // Stop checking after hit
+                this.delete(); // delete this projectile
+                return; // Stop checking after it hit something
             }
         }
     }

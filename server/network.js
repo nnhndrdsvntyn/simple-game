@@ -19,7 +19,9 @@ export function buildInitPacket() {
             chatMessage: player.chatMessage,
             score: player.score,
             angle: player.angle,
-            hasShield: player.hasShield
+            hasShield: player.hasShield,
+            health: player.health,
+            maxHealth: player.maxHealth
         };
     });
 
