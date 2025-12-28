@@ -26,12 +26,14 @@ export class XP {
             let percentageGain = (Math.floor(Math.random() * 6) + 5) / 10; // 50% to 100% gain possible.
             if (distance === 0) {
                 player.score += (this.score * percentageGain); // give player score
+                player.health = Math.min(player.maxHealth, player.health + (this.score * percentageGain)); // give player health
                 player.changed = true;
                 game.deleteEntity('XP_POINTS', this.id); // delete the xp from the list
                 io.emit('delete', { type: 'XP_POINTS', id: this.id }); // tell all clients to delete the xp from their lists
             } else {
                 // handle regular overlap (distance < minDistance)
                 player.score += (this.score * percentageGain); // give player score
+                player.health = Math.min(player.maxHealth, player.health + (this.score * percentageGain)); // give player health
                 player.changed = true;
                 game.deleteEntity('XP_POINTS', this.id); // delete the xp from the list
                 io.emit('delete', { type: 'XP_POINTS', id: this.id }); // tell all clients to delete the xp from their lists
