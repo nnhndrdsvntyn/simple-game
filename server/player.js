@@ -21,6 +21,7 @@ export class Player {
         this.score = 0;
         this.health = 100;
         this.maxHealth = 100;
+        this.naturalRegen = { speed: 1, health: 5 };
         this.angle = 0;
         this.canAttack = true;
         this.hasShield = true;
@@ -38,6 +39,14 @@ export class Player {
             d: false
         };
         this.changed = true;
+
+        // start natural regeneration interval
+        setInterval(() => {
+            if (this.health < this.maxHealth) {
+                this.health = Math.min(this.maxHealth, this.health + this.naturalRegen.health);
+                this.changed = true;
+            }
+        }, 1000 / this.naturalRegen.speed);
     }
     move() {
         const oldPos = {
@@ -55,7 +64,7 @@ export class Player {
 
         this.handleCollisions();
 
-        // clamp player inside map
+        // keep player inside map (10000 x 10000)
         if (this.pos.x < 0) this.pos.x = 0;
         if (this.pos.x > 10000) this.pos.x = 10000;
         if (this.pos.y < 0) this.pos.y = 0;
