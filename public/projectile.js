@@ -9,10 +9,6 @@ export class Projectile {
         this.newPos = { ... pos };
         this.angle = angle;
         this.radius = radius
-        LC.loadImage({
-            name: type,
-            src: entityMap.PROJECTILES[type].imgSrc,
-        });
     }
     draw = function() {
         // interpolate from pos to newPos

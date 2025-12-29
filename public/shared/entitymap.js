@@ -32,8 +32,15 @@ export const entityMap = {
             imgSrc: './images/projectiles/pebble.png',
             radius: 10,
             speed: 30,
-            damage: 50,
+            damage: 10,
             knockbackStrength: 30
+        },
+        'bullet': {
+            imgSrc: './images/projectiles/bullet.png',
+            radius: 10,
+            speed: 100,
+            damage: 50,
+            knockbackStrength: 15
         }
     },
     STRUCTURES: {

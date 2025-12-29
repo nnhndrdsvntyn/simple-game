@@ -14,11 +14,6 @@ export class Mob {
         this.newAngle = angle;
         this.type = type;
         this.radius = entityMap.MOBS[type].radius;
-
-        LC.loadImage({
-            name: type,
-            src: entityMap.MOBS[type].imgSrc,
-        });
     }
     draw = function() {
         // lerp from pos to newPos

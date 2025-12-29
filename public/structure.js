@@ -11,11 +11,6 @@ export class Structure {
         this.type = type;
         this.radius = entityMap.STRUCTURES[type].radius;
         this.color = entityMap.STRUCTURES[type].color;
-
-        LC.loadImage({
-            name: this.type,
-            src: entityMap.STRUCTURES[type].imgSrc
-        });
     }
     draw = function() {
         const screenPos = [

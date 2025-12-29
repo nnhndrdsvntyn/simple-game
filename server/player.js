@@ -215,7 +215,7 @@ export class Player {
         const projectile = new Projectile(id, {
             x: projectileX,
             y: projectileY
-        }, this.angle, 'pebble', this.id, 'player');
+        }, this.angle, 'bullet', this.id, 'player');
         game.ENTITIES.PROJECTILES[id] = projectile;
         io.emit('add', {
             type: 'PROJECTILES',

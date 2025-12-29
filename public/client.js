@@ -27,6 +27,7 @@ const images = [
     "./images/spawn-zone.png",
     "./images/rock1.png",
     "./images/projectiles/pebble.png",
+    "./images/projectiles/bullet.png",
     "./images/xp-green.png",
     "./images/xp-red.png",
     "./images/xp-blue.png",
