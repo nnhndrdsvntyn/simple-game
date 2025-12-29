@@ -1,7 +1,5 @@
 import { LC } from './client.js';
-import { entityMap } from '../shared/entitymap.js';
-
-Object.values(entityMap).forEach(projectile => LC.loadImage({ name: projectile.type, src: projectile.imgSrc }));
+import { entityMap } from './shared/entitymap.js';
 
 export class Projectile {
     constructor(id, pos, angle, type, radius) {
@@ -13,7 +11,7 @@ export class Projectile {
         this.radius = radius
         LC.loadImage({
             name: type,
-            src: entityMap.get(type).imgSrc,
+            src: entityMap.PROJECTILES[type].imgSrc,
         });
     }
     draw = function() {

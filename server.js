@@ -3,10 +3,8 @@ import http from 'http';
 import { Server } from 'socket.io';
 import { Game } from './server/game.js';
 import { Player } from './server/player.js';
-import { Projectile } from './server/projectile.js';
 import { buildInitPacket } from './server/network.js';
-import { verifyPacket } from './server/network.js';
-import { checkParseCommand } from './server/network.js';
+import { verifyPacket, checkParseCommand } from './server/network.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -107,6 +105,7 @@ function update() {
     // client update
     const clientUpdate = {
         PLAYERS: {},
+        MOBS: {},
         STRUCTURES: {},
         XP_POINTS: {},
         PROJECTILES: {}
@@ -130,9 +129,26 @@ function update() {
         player.changed = false;
     }
 
-    // make xps handle collisions
+    // update and add mobs to clientUpdate if they changed
+    for (const mob of Object.values(game.ENTITIES.MOBS)) {
+        mob.move();
+        if (mob.changed) clientUpdate.MOBS[mob.id] = {
+            id: mob.id,
+            pos: mob.pos,
+            angle: mob.angle,
+            health: mob.health
+        };
+        mob.changed = false;
+    }
+
+    // make xps handle collisions and also add them to clientUpdate
     for (const xp of Object.values(game.ENTITIES.XP_POINTS)) {
         xp.handleCollisions();
+        if (xp.changed) clientUpdate.XP_POINTS[xp.id] = {
+            id: xp.id,
+            pos: xp.pos,
+            type: xp.type
+        }
         xp.changed = false;
     }
 
@@ -162,7 +178,7 @@ function update() {
     }
     
     // send update packet to clients
-    if (Object.keys(clientUpdate.PLAYERS).length > 0 || Object.keys(clientUpdate.PROJECTILES).length > 0) io.emit('update', clientUpdate);
+    if (Object.keys(clientUpdate.PLAYERS).length > 0 || Object.keys(clientUpdate.PROJECTILES).length > 0 || Object.keys(clientUpdate.XP_POINTS).length > 0 || Object.keys(clientUpdate.STRUCTURES).length > 0 || Object.keys(clientUpdate.MOBS).length > 0) io.emit('update', clientUpdate);
 }
 setInterval(update, 1000 / 20);
 

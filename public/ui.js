@@ -1,6 +1,5 @@
-import { socket } from './client.js';
+import { socket, LC } from './client.js';
 import { ENTITIES } from './game.js';
-import { LC } from './client.js';
 
 // Mobile detection
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);

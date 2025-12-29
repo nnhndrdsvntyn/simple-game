@@ -6,7 +6,7 @@ export class Structure {
         this.pos = pos;
         this.type = type;
         this.changed = false;
-        this.radius = entityMap.get(type).radius;
+        this.radius = entityMap.STRUCTURES[type].radius;
     }
     handleCollisions() {
         if (this.type === 'spawn-zone') {
@@ -23,13 +23,13 @@ export class Structure {
                 if (distance < this.radius + structure.radius && distance > 0) {
                     const overlap = this.radius + structure.radius - distance;
                     const angle = Math.atan2(dy, dx);
-                    this.pos.x += Math.cos(angle) * overlap;
-                    this.pos.y += Math.sin(angle) * overlap;
+                    this.pos.x += Math.cos(angle) * overlap + 200; // extra 200 so they stop touching
+                    this.pos.y += Math.sin(angle) * overlap + 200; // extra 200 so they stop touching
                     this.changed = true;
                 } else if (distance === 0) {
                     // if they are perfectly on top of each other, move this structure slightly
-                    this.pos.x += (Math.random() - 0.5) * 2;
-                    this.pos.y += (Math.random() - 0.5) * 2;
+                    this.pos.x += (Math.random() - 0.5) * 2 + 200; // extra 200 so they stop touching
+                    this.pos.y += (Math.random() - 0.5) * 2 + 200; // extra 200 so they stop touching
                     this.changed = true;
                 }
             }

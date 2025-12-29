@@ -2,20 +2,15 @@ import { socket } from './client.js';
 import { ENTITIES } from './game.js';
 import { camera } from './client.js';
 import { LC } from './client.js';
-import { entityMap } from '../shared/entitymap.js';
+import { entityMap } from './shared/entitymap.js';
 
 export class XP {
     constructor(id, pos, type) {
         this.id = id;
         this.pos = pos;
         this.type = type;
-        this.radius = entityMap.get(type).radius;
-        this.color = entityMap.get(type).color;
-
-        LC.loadImage({
-            name: this.type,
-            src: entityMap.get(type).imgSrc
-        });
+        this.radius = entityMap.XP_POINTS[type].radius;
+        this.color = entityMap.XP_POINTS[type].color;
     }
     draw = function() {
         const screenPos = [
@@ -33,7 +28,7 @@ export class XP {
 
         LC.drawImage({
             pos: [screenPos[0] - (this.radius), screenPos[1] - (this.radius)],
-            name: this.type,
+            name: 'xp-' + this.type,
             size: [
                 this.radius * 2,
                 this.radius * 2

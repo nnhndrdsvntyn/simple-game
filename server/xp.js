@@ -4,11 +4,11 @@ import { entityMap } from '../public/shared/entitymap.js'
 
 export class XP {
     constructor(id, pos, type) {
-        this.color = entityMap.get(type).color;
+        this.color = entityMap.XP_POINTS[type].color;
         this.id = id;
-        this.radius = entityMap.get(type).radius;
-        this.type = entityMap.get(type).type;
-        this.score = entityMap.get(type).score;
+        this.radius = entityMap.XP_POINTS[type].radius;
+        this.type = type;
+        this.score = entityMap.XP_POINTS[type].score;
         this.pos = pos;
     }
     handleCollisions() {
@@ -26,14 +26,12 @@ export class XP {
             let percentageGain = (Math.floor(Math.random() * 6) + 5) / 10; // 50% to 100% gain possible.
             if (distance === 0) {
                 player.score += (this.score * percentageGain); // give player score
-                player.health = Math.min(player.maxHealth, player.health + (this.score * percentageGain)); // give player health
                 player.changed = true;
                 game.deleteEntity('XP_POINTS', this.id); // delete the xp from the list
                 io.emit('delete', { type: 'XP_POINTS', id: this.id }); // tell all clients to delete the xp from their lists
             } else {
                 // handle regular overlap (distance < minDistance)
                 player.score += (this.score * percentageGain); // give player score
-                player.health = Math.min(player.maxHealth, player.health + (this.score * percentageGain)); // give player health
                 player.changed = true;
                 game.deleteEntity('XP_POINTS', this.id); // delete the xp from the list
                 io.emit('delete', { type: 'XP_POINTS', id: this.id }); // tell all clients to delete the xp from their lists
@@ -57,6 +55,9 @@ export class XP {
 
         // check collisions with structures and move the xp outside
         for (const structure of Object.values(game.ENTITIES.STRUCTURES)) {
+            // allow it to xp to spawn inside spawn zones
+            if (structure.type === 'spawn-zone') continue; // skip
+            
             const dx = this.pos.x - structure.pos.x;
             const dy = this.pos.y - structure.pos.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -69,8 +70,8 @@ export class XP {
                 const overlap = minDistance - distance;
                 const moveX = normalX * overlap;
                 const moveY = normalY * overlap;
-                this.pos.x += moveX + 10;
-                this.pos.y += moveY + 10;
+                this.pos.x += moveX + 200; // extra 200 so they stop touching
+                this.pos.y += moveY + 200; // extra 200 so they stop touching
                 this.changed = true;
             }
         }

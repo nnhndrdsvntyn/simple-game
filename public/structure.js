@@ -2,19 +2,19 @@ import { socket } from './client.js';
 import { ENTITIES } from './game.js';
 import { camera } from './client.js';
 import { LC } from './client.js';
-import { entityMap } from '../shared/entitymap.js';
+import { entityMap } from './shared/entitymap.js';
 
 export class Structure {
     constructor(id, pos, type) {
         this.id = id;
         this.pos = pos;
         this.type = type;
-        this.radius = entityMap.get(type).radius;
-        this.color = entityMap.get(type).color;
+        this.radius = entityMap.STRUCTURES[type].radius;
+        this.color = entityMap.STRUCTURES[type].color;
 
         LC.loadImage({
             name: this.type,
-            src: entityMap.get(type).imgSrc
+            src: entityMap.STRUCTURES[type].imgSrc
         });
     }
     draw = function() {

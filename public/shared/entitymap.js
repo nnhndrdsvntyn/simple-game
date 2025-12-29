@@ -1,61 +1,77 @@
-import { images } from '../images/images.js';
-
-export const entityMap = new Map();
-
-// Player
-entityMap.set('player-default', {
-    type: 'player-default',
-    imgSrc: './images/player-default.png'
-});
-
-// Projectile
-entityMap.set('pebble', {
-    type: 'pebble',
-    imgSrc: images['pebble'],
-    radius: 10,
-    knockbackStrength: 30,
-});
-
-// Structure
-entityMap.set('spawn-zone', {
-    type: 'spawn-zone',
-    radius: 500,
-    color: 'blue',
-    imgSrc: './images/spawn-zone.png'
-});
-entityMap.set('rock1', {
-    type: 'rock1',
-    radius: 150,
-    color: 'black',
-    imgSrc: './images/rock1.png'
-});
-
-// XP
-entityMap.set('green', {
-    type: 'green',
-    radius: 30,
-    score: 10,
-    color: 'green',
-    imgSrc: './images/xp-green.png'
-});
-entityMap.set('red', {
-    type: 'red',
-    radius: 30,
-    score: 30,
-    color: 'red',
-    imgSrc: './images/xp-red.png'
-});
-entityMap.set('blue', {
-    type: 'blue',
-    radius: 30,
-    score: 100,
-    color: 'blue',
-    imgSrc: './images/xp-blue.png'
-});
-entityMap.set('purple', {
-    type: 'purple',
-    radius: 30,
-    score: 250,
-    color: 'purple',
-    imgSrc: './images/xp-purple.png'
-});
+export const entityMap = {
+    PLAYERS: {
+        defaultScore: 0,
+        defaultRadius: 30,
+        defaultSpeed: 20,
+        'skins': {
+            "player-default": './images/player-default.png'
+        }
+    },
+    MOBS: {
+        chick: {
+            radius: 30,
+            xpDropTypes: ['green'],
+            xpDropAmountRange: [1, 1],
+            speed: 10,
+            score: 50,
+            maxHealth: 20,
+            imgSrc: './images/chick.png'
+        },
+        pig: {
+            radius: 60,
+            xpDropTypes: ['green', 'red'],
+            xpDropAmountRange: [1, 4],
+            speed: 10,
+            score: 200,
+            maxHealth: 100,
+            imgSrc: './images/pig.png'
+        }
+    },
+    PROJECTILES: {
+        'pebble': {
+            imgSrc: './images/projectiles/pebble.png',
+            radius: 10,
+            speed: 30,
+            damage: 50,
+            knockbackStrength: 30
+        }
+    },
+    STRUCTURES: {
+        'spawn-zone': {
+            imgSrc: './images/spawn-zone.png',
+            radius: 500,
+            color: 'blue'
+        },
+        'rock1': {
+            imgSrc: './images/rock1.png',
+            radius: 150,
+            color: 'black'
+        }
+    },
+    XP_POINTS: {
+        'green': {
+            imgSrc: './images/xp-green.png',
+            radius: 30,
+            score: 10,
+            color: 'green'
+        },
+        'red': {
+            imgSrc: './images/xp-red.png',
+            radius: 30,
+            score: 30,
+            color: 'red'
+        },
+        'blue': {
+            imgSrc: './images/xp-blue.png',
+            radius: 30,
+            score: 100,
+            color: 'blue',
+        },
+        'purple': {
+            imgSrc: './images/xp-purple.png',
+            radius: 30,
+            score: 250,
+            color: 'purple'
+        }
+    }
+}

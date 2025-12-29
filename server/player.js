@@ -1,12 +1,8 @@
-import {
-    game
-} from '../server.js';
+import { game, io } from '../server.js';
 import {
     Projectile
 } from './projectile.js';
-import {
-    io
-} from '../server.js';
+import { entityMap } from '../public/shared/entitymap.js';
 
 export class Player {
     constructor(id) {
@@ -15,8 +11,8 @@ export class Player {
             x: 5000,
             y: 5000
         };
-        this.speed = 20;
-        this.radius = 30;
+        this.speed = entityMap.PLAYERS.defaultSpeed;
+        this.radius = entityMap.PLAYERS.defaultRadius;
         this.chatMessage = "";
         this.score = 0;
         this.health = 100;
@@ -90,18 +86,18 @@ export class Player {
 
                 if (isPlayer) {
                     // Both players move
-                    thisObj.pos.x += Math.cos(angle) * pushDistance + 3; // extra 3 so they stop touching
-                    thisObj.pos.y += Math.sin(angle) * pushDistance + 3; // extra 3 so they stop touching
+                    thisObj.pos.x += Math.cos(angle) * (pushDistance + 1); // extra 1 so they stop touching
+                    thisObj.pos.y += Math.sin(angle) * (pushDistance + 1); // extra 1 so they stop touching
 
-                    otherObj.pos.x -= Math.cos(angle) * pushDistance + 3; // extra 3 so they stop touching
-                    otherObj.pos.y -= Math.sin(angle) * pushDistance + 3; // extra 3 so they stop touching
+                    otherObj.pos.x -= Math.cos(angle) * (pushDistance + 1); // extra 1 so they stop touching
+                    otherObj.pos.y -= Math.sin(angle) * (pushDistance + 1); // extra 1 so they stop touching
 
                     thisObj.changed = true;
                     otherObj.changed = true;
                 } else {
                     // Only this player moves (structure doesn't move)
-                    thisObj.pos.x += Math.cos(angle) * pushDistance * 2 + 3; // extra 3 so they stop touching
-                    thisObj.pos.y += Math.sin(angle) * pushDistance * 2 + 3; // extra 3 so they stop touching
+                    thisObj.pos.x += Math.cos(angle) * (pushDistance * 2 + 1); // extra 1 so they stop touching
+                    thisObj.pos.y += Math.sin(angle) * (pushDistance * 2 + 1); // extra 1 so they stop touching
                     thisObj.changed = true;
                 }
                 return;
@@ -109,26 +105,26 @@ export class Player {
 
             // Normal collision (distance > 0)
             const overlap = minDistance - distance;
-            const pushX = (dx / distance) * overlap;
-            const pushY = (dy / distance) * overlap;
+            const nx = dx / distance;
+            const ny = dy / distance;
 
             if (isPlayer) {
                 // Both players move half the overlap
-                const halfPushX = pushX / 2;
-                const halfPushY = pushY / 2;
+                const pushDist = (overlap / 2) + 1;
 
-                thisObj.pos.x += halfPushX + 3; // extra 3 so they stop touching
-                thisObj.pos.y += halfPushY; // extra 3 so they stop touching
+                thisObj.pos.x += nx * pushDist;
+                thisObj.pos.y += ny * pushDist;
 
-                otherObj.pos.x -= halfPushX + 3; // extra 3 so they stop touching
-                otherObj.pos.y -= halfPushY + 3; // extra 3 so they stop touching
+                otherObj.pos.x -= nx * pushDist;
+                otherObj.pos.y -= ny * pushDist;
 
                 thisObj.changed = true;
                 otherObj.changed = true;
             } else {
                 // Only this player moves (structure doesn't move)
-                thisObj.pos.x += pushX + 3; // extra 3 so they stop touching
-                thisObj.pos.y += pushY + 3; // extra 3 so they stop touching
+                const pushDist = overlap + 1;
+                thisObj.pos.x += nx * pushDist;
+                thisObj.pos.y += ny * pushDist;
                 thisObj.changed = true;
             }
         };
@@ -174,6 +170,13 @@ export class Player {
         if (type === 'player') {
             game.ENTITIES.PLAYERS[killerId].score += this.score; // give killer their score
             game.ENTITIES.PLAYERS[killerId].changed = true;
+            // tell victim who killed them, and tell the killer the victim they killed
+            io.to(killerId).emit('killed', this.id);
+            io.to(this.id).emit('diedTo', {
+                type: 'player',
+                id: killerId
+            });
+
             this.pos.x = 5000; // send back to center of map
             this.pos.y = 5000; // send back to center of map
             this.health = this.maxHealth // reset health

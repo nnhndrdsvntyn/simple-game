@@ -11,38 +11,27 @@ import {
     LC
 } from './client.js';
 import { renderGameInfo } from './ui.js';
-import { entityMap } from '../shared/entitymap.js';
+import { entityMap } from './shared/entitymap.js';
 
 export class Player {
-    constructor(id, pos = {
-        x: 5000,
-        y: 5000
-    }) {
+    constructor(id, pos = {x: 5000, y: 5000}) {
         this.id = id;
-        this.radius = 30;
-        this.newRadius = 30;
-        this.score = 0;
-        this.newScore = 0;
+        this.radius = entityMap.PLAYERS.defaultRadius
+        this.newRadius = this.radius;
+        this.score = entityMap.PLAYERS.defaultScore;
+        this.newScore = this.score;
         this.hasShield = true;
         this.health = null;
         this.newHealth = null;
         this.maxHealth = null;
         this.pos = pos;
-        this.newAngle = 0;
-        this.angle = 0;
         this.newPos = {
             ...this.pos
         };
+        this.newAngle = 0;
+        this.angle = 0;
         this.chatMessage = "";
         this.color = (this.id === socket.id) ? 'blue' : 'red'; // blue if local player, red if its another player
-        LC.loadImage({
-            name: 'player-default',
-            src: entityMap.get('player-default').imgSrc
-        });
-        LC.loadImage({
-            name: 'spawn-zone-shield',
-            src: './images/spawn-zone-shield.png'
-        })
     }
     draw = function() {
         // interpolate from pos to newPos

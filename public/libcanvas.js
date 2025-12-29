@@ -12,7 +12,7 @@ class LibCanvas {
             socket.canSendPacket = false;
             setTimeout(() => {
                 socket.canSendPacket = true;
-            }, 1000 / 30);
+            }, 1000 / 60);
             
             let centerX = window.innerWidth / 2;
             let centerY = window.innerHeight / 2;

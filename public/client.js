@@ -19,6 +19,28 @@ const network = new Network(socket);
 export const LC = new LibCanvas();
 window.LC = LC;
 
+// load the images
+const images = [
+    "./images/player-default.png",
+    "./images/chick.png",
+    "./images/pig.png",
+    "./images/spawn-zone.png",
+    "./images/rock1.png",
+    "./images/projectiles/pebble.png",
+    "./images/xp-green.png",
+    "./images/xp-red.png",
+    "./images/xp-blue.png",
+    "./images/xp-purple.png",
+    "./images/spawn-zone-shield.png"
+];
+
+images.forEach(image => {
+    LC.loadImage({
+        name: image.split('/').pop().split('.')[0], // extract name
+        src: image
+    })
+})
+
 const camera = {
     width: LC.width,
     height: LC.height,
@@ -72,6 +94,10 @@ function render() {
 
     // draw all players
     for (const player of Object.values(ENTITIES.PLAYERS)) player.draw();
+
+    // draw all mobs
+    for (const mob of Object.values(ENTITIES.MOBS)) mob.draw();
+
 
     // draw all projectiles
     for (const projectile of Object.values(ENTITIES.PROJECTILES)) projectile.draw();

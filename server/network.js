@@ -5,6 +5,7 @@ import {
 export function buildInitPacket() {
     const initPacket = {
         PLAYERS: {},
+        MOBS: {},
         STRUCTURES: {},
         XP_POINTS: {},
         PROJECTILES: {}
@@ -39,6 +40,18 @@ export function buildInitPacket() {
     Object.values(game.ENTITIES.PROJECTILES).forEach(projectile => {
         initPacket['PROJECTILES'][projectile.id] = projectile;
     });
+
+    // send mob data to clients
+    Object.values(game.ENTITIES.MOBS).forEach(mob => {
+        initPacket['MOBS'][mob.id] = {
+            id: mob.id,
+            type: mob.type,
+            pos: mob.pos,
+            angle: mob.angle,
+            health: mob.health
+        }
+    });
+
 
     // return the init packet
     return initPacket;
