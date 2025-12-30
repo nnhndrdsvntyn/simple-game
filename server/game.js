@@ -25,13 +25,22 @@ export class Game {
             this.newEntity('MOBS', new Mob('chick' + i, randomPos, 'chick'));
         }
 
-        for (let i = 1; i <= 100; i++) {
+        for (let i = 1; i <= 40; i++) {
             const radius = entityMap.MOBS['pig'].radius;
             let randomPos = {
                 x: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
                 y: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
             }
             this.newEntity('MOBS', new Mob('pig' + i, randomPos, 'pig'));
+        }
+
+        for (let i = 1; i <= 100; i++) {
+            const radius = entityMap.MOBS['cow'].radius;
+            let randomPos = {
+                x: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
+                y: Math.floor(Math.random() * (10000 - radius * 2)) + radius,
+            }
+            this.newEntity('MOBS', new Mob('cow' + i, randomPos, 'cow'));
         }
 
 

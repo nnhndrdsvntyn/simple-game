@@ -24,10 +24,12 @@ const images = [
     "./images/player-default.png",
     "./images/chick.png",
     "./images/pig.png",
+    "./images/cow.png",
     "./images/spawn-zone.png",
     "./images/rock1.png",
     "./images/projectiles/pebble.png",
     "./images/projectiles/bullet.png",
+    "./images/projectiles/bowling-ball.png",
     "./images/xp-green.png",
     "./images/xp-red.png",
     "./images/xp-blue.png",
@@ -40,7 +42,21 @@ images.forEach(image => {
         name: image.split('/').pop().split('.')[0], // extract name
         src: image
     })
-})
+});
+
+// load the audios
+const audios = [
+    "./audios/pop.mp3",
+    "./audios/hurt.mp3",
+    "./audios/scream1.mp3"
+];
+
+audios.forEach(audio => {
+    LC.loadAudio({
+        name: audio.split('/').pop().split('.')[0], // extract name
+        src: audio
+    })
+});
 
 const camera = {
     width: LC.width,
@@ -93,15 +109,15 @@ function render() {
     // draw all xp points
     for (const xp of Object.values(ENTITIES.XP_POINTS)) xp.draw();
 
-    // draw all players
-    for (const player of Object.values(ENTITIES.PLAYERS)) player.draw();
-
     // draw all mobs
     for (const mob of Object.values(ENTITIES.MOBS)) mob.draw();
 
 
     // draw all projectiles
     for (const projectile of Object.values(ENTITIES.PROJECTILES)) projectile.draw();
+
+    // draw all players
+    for (const player of Object.values(ENTITIES.PLAYERS)) player.draw();
 
     requestAnimationFrame(render);
 }

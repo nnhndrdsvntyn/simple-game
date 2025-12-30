@@ -96,16 +96,18 @@ export class Mob {
             this.spawnXP(xpType);
         }
         game.deleteEntity('MOBS', this.id);
-        game.newEntity('MOBS', new Mob(this.id, randomPos, this.type));
-        io.emit('add', {
-            type: 'MOBS',
-            id: this.id,
-            entity: {
-                pos: randomPos,
-                type: this.type,
-                angle: this.angle
-            }
-        });
+        setTimeout(() => {
+            game.newEntity('MOBS', new Mob(this.id, randomPos, this.type));
+            io.emit('add', {
+                type: 'MOBS',
+                id: this.id,
+                entity: {
+                    pos: randomPos,
+                    type: this.type,
+                    angle: this.angle
+                }
+            });
+        }, 2500);
     }
     spawnXP(xpType) {
         const radius = entityMap.XP_POINTS[xpType].radius;

@@ -33,15 +33,26 @@ export class Mob {
         // apply image proportions based on mob
         const imgProportions = [this.radius * 2, this.radius * 2];
         if (this.type === 'pig') {
-            imgProportions[0] += 100;
+            imgProportions[0] += 50;
+        } else if (this.type === 'cow') {
+            imgProportions[0] += 50
         }
     
         LC.drawImage({
             name: this.type,
-            pos: [screenPos[0] - this.radius, screenPos[1] - this.radius],
+            pos: [screenPos[0] - imgProportions[0] / 2, screenPos[1] - imgProportions[1] / 2],
             rotation: this.angle,
             size: imgProportions
         });
+
+        // hitbox debug
+        /*
+        LC.drawCircle({
+            pos: screenPos,
+            radius: this.radius,
+            color: 'red'
+        });
+        */
 
         // lerp from health to newHealth
         this.health += (this.newHealth - this.health) * lerpSpeedOrWhatever;

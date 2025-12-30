@@ -1,6 +1,7 @@
 class LibCanvas {
     constructor() {
         this.images = {};
+        this.audios = {};
         [this.width, this.height] = [1440, 760];
         this.createDOM();
 
@@ -194,6 +195,28 @@ class LibCanvas {
         });
     }
 
+    loadAudio({
+        name,
+        src
+    } = {}) {
+        if (name === undefined) {
+            throw new Error('name must be defined for loadAudio');
+        }
+        if (src === undefined) {
+            throw new Error('src must be defined for loadAudio');
+        }
+
+        return new Promise((resolve, reject) => {
+            const audio = new Audio();
+            audio.oncanplaythrough = () => {
+                this.audios[name] = audio;
+                resolve(audio);
+            };
+            audio.onerror = reject;
+            audio.src = src;
+        });
+    }
+
     drawImage({
         name,
         pos = [0, 0],
@@ -231,6 +254,25 @@ class LibCanvas {
         this.ctx.drawImage(this.images[name], -halfWidth, -halfHeight, width, height);
         this.ctx.globalAlpha = 1;
         this.ctx.restore();
+    }
+
+    playAudio({
+        name,
+        volume = 1
+    } = {}) {
+        if (name === undefined) {
+            throw new Error('name must be defined for playAudio');
+        }
+        if (typeof volume !== 'number' || volume < 0 || volume > 1) {
+            throw new Error('volume must be a number between 0 and 1 for playAudio');
+        }
+        if (!this.audios[name]) {
+            return;
+        }
+
+        const audio = this.audios[name].cloneNode();
+        audio.volume = volume;
+        audio.play().catch(e => console.error(e));
     }
 
     get center() {

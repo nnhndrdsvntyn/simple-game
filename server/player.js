@@ -15,11 +15,15 @@ export class Player {
         this.radius = entityMap.PLAYERS.defaultRadius;
         this.chatMessage = "";
         this.score = 0;
+        this.heldProjectile = 'bowling-ball';
         this.health = 100;
         this.maxHealth = 100;
         this.naturalRegen = { speed: 1, health: 5 };
         this.angle = 0;
         this.canAttack = true;
+        this.attackSpeed = 1;
+        this.canDash = true;
+        this.dashCooldown = 500; // 1 second cooldown
         this.hasShield = true;
         this.attackInterval = null;
         this.chatTimeout = null;
@@ -215,7 +219,7 @@ export class Player {
         const projectile = new Projectile(id, {
             x: projectileX,
             y: projectileY
-        }, this.angle, 'bullet', this.id, 'player');
+        }, this.angle, this.heldProjectile, this.id, 'player');
         game.ENTITIES.PROJECTILES[id] = projectile;
         io.emit('add', {
             type: 'PROJECTILES',
@@ -231,32 +235,41 @@ export class Player {
     }
 
     setAttack(state) {
-        if (state) {
-            if (this.hasShield) return;
-            // an interval already exists? then don't continue
-            if (this.attackInterval) return;
+        if (this.hasShield) return;
 
-            this.attackInterval = setInterval(() => {
-                if (!this.canAttack) return;
-                this.canAttack = false;
-                this.attack();
-                setTimeout(() => {
-                    this.canAttack = true;
-                }, 250);
-            }, 250);
+        const attackCooldown = entityMap.PROJECTILES[this.heldProjectile].cooldownTime / this.attackSpeed;
 
-            // trigger first attack immediately
-            if (this.canAttack) {
-                this.canAttack = false;
-                this.attack();
-                setTimeout(() => {
-                    this.canAttack = true;
-                }, 250);
-            }
+        const performAttack = () => {
+            if (!this.canAttack) return;
+            this.canAttack = false;
+            this.attack();
+            setTimeout(() => {
+                this.canAttack = true;
+            }, attackCooldown);
+        };
 
-        } else {
+        if (state) { // Mouse down
+            if (this.attackInterval) return; // Already attacking
+
+            performAttack(); // Trigger first attack immediately
+            this.attackInterval = setInterval(performAttack, attackCooldown);
+        } else { // Mouse up
             clearInterval(this.attackInterval);
             this.attackInterval = null;
+        }
+    }
+    dash() {
+        const dashDistance = 60; // Adjust dash distance as needed
+        if (this.canDash) {
+            this.canDash = false;
+            const angleInRadians = this.angle * (Math.PI / 180);
+            this.pos.x += Math.cos(angleInRadians) * dashDistance;
+            this.pos.y += Math.sin(angleInRadians) * dashDistance;
+            this.changed = true;
+
+            setTimeout(() => {
+                this.canDash = true;
+            }, this.dashCooldown);
         }
     }
 }

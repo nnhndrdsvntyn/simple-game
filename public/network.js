@@ -2,9 +2,9 @@ import { ENTITIES } from './game.js';
 import { Player } from './player.js';
 import { Mob } from './mob.js';
 import { Structure } from './structure.js'
+import { socket, LC, camera } from './client.js';
 import { XP } from './xp.js'
 import { Projectile } from './projectile.js'
-import { camera } from './client.js';
 
 export class Network {
     constructor(socket) {
@@ -78,6 +78,11 @@ export class Network {
     onDelete(data) {
         // console.log('delete:', data);
         delete ENTITIES[data.type][data.id];
+        if (data.type === 'MOBS') {
+            LC.playAudio({
+                name: 'pop'
+            });
+        }
     }
 
     onUpdate(data) {
@@ -91,6 +96,13 @@ export class Network {
             ENTITIES.PLAYERS[id].newRadius = data.PLAYERS[id].radius;
             ENTITIES.PLAYERS[id].newAngle = data.PLAYERS[id].angle;
             ENTITIES.PLAYERS[id].hasShield = data.PLAYERS[id].hasShield;
+
+            if (ENTITIES.PLAYERS[id].newHealth > data.PLAYERS[id].health) {
+                LC.playAudio({
+                    name: 'hurt'
+                });
+            }
+
             ENTITIES.PLAYERS[id].newHealth = data.PLAYERS[id].health;
             ENTITIES.PLAYERS[id].maxHealth = data.PLAYERS[id].maxHealth;
         }
@@ -100,7 +112,13 @@ export class Network {
             if (!ENTITIES.MOBS[id]) continue;
             ENTITIES.MOBS[id].newPos = data.MOBS[id].pos;
             ENTITIES.MOBS[id].newAngle = data.MOBS[id].angle;
-            ENTITIES.MOBS[id].health = data.MOBS[id].health;
+
+            // check if heatlh went down, and play damage sfx
+            if (ENTITIES.MOBS[id].newHealth > data.MOBS[id].health) {
+                LC.playAudio({
+                    name: 'hurt'
+                });
+            }
             ENTITIES.MOBS[id].newHealth = data.MOBS[id].health;
         }
 
@@ -122,9 +140,15 @@ export class Network {
 
     onDiedTo(data) {
         console.log('You were killed by', data.id);
-    }
+        LC.playAudio({
+            name: 'scream1'
+        });
+    };
 
     onKilled(data) {
         console.log('You killed', data);
+        LC.playAudio({
+            name: 'scream1'
+        });
     }
 }

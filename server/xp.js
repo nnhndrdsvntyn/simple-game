@@ -10,6 +10,10 @@ export class XP {
         this.type = type;
         this.score = entityMap.XP_POINTS[type].score;
         this.pos = pos;
+        // despawn xp after 10 seconds
+        this.despawnTimer = setTimeout(() => {
+            this.delete();
+        }, 10000)
     }
     handleCollisions() {
         // check if a player is touching it
@@ -75,5 +79,9 @@ export class XP {
                 this.changed = true;
             }
         }
+    }
+    delete() {
+        clearTimeout(this.despawnTimer);
+        game.deleteEntity('XP_POINTS', this.id);
     }
 }

@@ -87,6 +87,10 @@ io.on('connection', (socket) => {
         
         let player = game.ENTITIES.PLAYERS[socket.id];
         player.setAttack(d);
+    });
+
+    socket.on('dash', (d) => {
+        game.ENTITIES.PLAYERS[socket.id].dash();
     })
 
     socket.on(adminPassword, (d) => {
@@ -97,7 +101,7 @@ io.on('connection', (socket) => {
             game.ENTITIES.PLAYERS[d].isAdmin = true;
             console.log("player", d, "is now admin");
         }
-    })
+    });
 });
 
 // update loop
